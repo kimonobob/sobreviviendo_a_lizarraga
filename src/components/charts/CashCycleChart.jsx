@@ -13,7 +13,7 @@ import {
 import { cashCycle, workingCapital } from "../../lib/finance";
 import { dias, soles, axisMillones } from "../../lib/format";
 import { ink, flow } from "../../lib/palette";
-import { StaticLegend } from "../ui/Legend";
+
 import { SegToggle } from "../ui/Toggle";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
 import { ChartBox } from "../ui/ChartBox";
@@ -25,7 +25,7 @@ const C = {
   cce: "var(--series-1)",
 };
 
-export function CashCycleChart({ data, markYear, chart }) {
+export function CashCycleChart({ data, markYear, title, subtitle, chart }) {
   const [mode, setMode] = useState("ciclo"); // ciclo | ktn
   const cc = cashCycle(data);
   const wc = workingCapital(data);
@@ -60,21 +60,27 @@ export function CashCycleChart({ data, markYear, chart }) {
     );
   };
 
+  const cicloLegend = [
+    { id: "dio", label: "Días inventario", color: C.dio },
+    { id: "dso", label: "Días cobro", color: C.dso },
+    { id: "dpo", label: "Días pago (↓)", color: C.dpo },
+    { id: "cce", label: "Ciclo de efectivo", color: C.cce },
+  ];
+
+  const axisTickStyle = { fill: ink.muted, fontSize: 9 };
+  const axisLabelStyle = { fill: ink.muted, fontSize: 8, textAnchor: "middle" };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        {mode === "ciclo" ? (
-          <StaticLegend
-            items={[
-              { id: "dio", label: "Días inventario", color: C.dio },
-              { id: "dso", label: "Días cobro", color: C.dso },
-              { id: "dpo", label: "Días pago (↓)", color: C.dpo },
-              { id: "cce", label: "Ciclo de efectivo", color: C.cce },
-            ]}
-          />
-        ) : (
-          <span className="text-xs text-ink-secondary">Capital de trabajo neto = Activo corriente − Pasivo corriente</span>
-        )}
+      <div className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-baseline gap-2 min-w-0">
+          {title && (
+            <h2 className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink shrink-0">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
+          )}
+        </div>
         <SegToggle
           value={mode}
           onChange={setMode}
@@ -82,17 +88,30 @@ export function CashCycleChart({ data, markYear, chart }) {
             { value: "ciclo", label: "Ciclo (días)" },
             { value: "ktn", label: "Capital trabajo" },
           ]}
+          size="xs"
         />
       </div>
 
-      <div className="min-h-0 flex-1">
+      {mode === "ciclo" && (
+        <div className="lg:hidden flex flex-wrap items-center gap-x-4 gap-y-1.5 shrink-0">
+          {cicloLegend.map((it) => (
+            <span key={it.id} className="flex items-center gap-1.5 text-[9px] text-ink-secondary">
+              <span className="inline-block h-2 w-2 shrink-0 rounded-sm ring-1 ring-inset ring-black/10" style={{ background: it.color }} />
+              {it.label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex min-h-0 flex-1 gap-2">
+        <div className="min-h-0 flex-1">
         <ChartBox w={chart?.w} h={chart?.h}>
           {mode === "ciclo" ? (
             <ComposedChart data={cc} margin={{ top: 8, right: 12, bottom: 4, left: 4 }} barCategoryGap="18%">
               <CartesianGrid stroke={ink.grid} vertical={false} />
-              <XAxis dataKey="year" tick={{ fill: ink.muted, fontSize: 12 }} tickLine={false} axisLine={{ stroke: ink.baseline }} minTickGap={8} />
-              <YAxis tick={{ fill: ink.muted, fontSize: 12 }} tickLine={false} axisLine={false} width={40}
-                label={{ value: "días", angle: -90, position: "insideLeft", style: { fill: ink.muted, fontSize: 11, textAnchor: "middle" } }} />
+              <XAxis dataKey="year" tick={axisTickStyle} tickLine={false} axisLine={{ stroke: ink.baseline }} minTickGap={8} />
+              <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={32}
+                label={{ value: "días", angle: -90, position: "insideLeft", style: axisLabelStyle }} />
               <ReferenceLine y={0} stroke={ink.baseline} />
               {markYear && <ReferenceLine x={markYear} stroke={ink.baseline} strokeDasharray="3 3" strokeOpacity={0.7} />}
               <Tooltip content={<TipCiclo />} cursor={{ fill: "var(--gridline)", fillOpacity: 0.3 }} />
@@ -104,9 +123,9 @@ export function CashCycleChart({ data, markYear, chart }) {
           ) : (
             <ComposedChart data={wc} margin={{ top: 8, right: 12, bottom: 4, left: 4 }} barCategoryGap="18%">
               <CartesianGrid stroke={ink.grid} vertical={false} />
-              <XAxis dataKey="year" tick={{ fill: ink.muted, fontSize: 12 }} tickLine={false} axisLine={{ stroke: ink.baseline }} minTickGap={8} />
-              <YAxis tickFormatter={axisMillones} tick={{ fill: ink.muted, fontSize: 12 }} tickLine={false} axisLine={false} width={52}
-                label={{ value: "S/ millones", angle: -90, position: "insideLeft", style: { fill: ink.muted, fontSize: 11, textAnchor: "middle" } }} />
+              <XAxis dataKey="year" tick={axisTickStyle} tickLine={false} axisLine={{ stroke: ink.baseline }} minTickGap={8} />
+              <YAxis tickFormatter={axisMillones} tick={axisTickStyle} tickLine={false} axisLine={false} width={40}
+                label={{ value: "S/ millones", angle: -90, position: "insideLeft", style: axisLabelStyle }} />
               <ReferenceLine y={0} stroke={ink.baseline} />
               {markYear && <ReferenceLine x={markYear} stroke={ink.baseline} strokeDasharray="3 3" strokeOpacity={0.7} />}
               <Tooltip content={<TipKtn />} cursor={{ fill: "var(--gridline)", fillOpacity: 0.3 }} />
@@ -118,6 +137,17 @@ export function CashCycleChart({ data, markYear, chart }) {
             </ComposedChart>
           )}
         </ChartBox>
+        </div>
+        {mode === "ciclo" && (
+          <div className="hidden flex-col items-start justify-center gap-2 lg:flex shrink-0">
+            {cicloLegend.map((it) => (
+              <span key={it.id} className="flex items-center gap-1.5 text-[9px] text-ink-secondary whitespace-nowrap">
+                <span className="inline-block h-2 w-2 shrink-0 rounded-sm ring-1 ring-inset ring-black/10" style={{ background: it.color }} />
+                {it.label}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 // Conmutador segmentado (ej: Montos ↔ %, o Nominal ↔ Composición).
 export function SegToggle({ options, value, onChange, size = "sm" }) {
-  const pad = size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm";
+  const pad = size === "xs" ? "px-2 py-0.5 text-[9px]" : size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm";
   return (
     <div className="inline-flex rounded-md border border-hair bg-plane p-0.5">
       {options.map((o) => (

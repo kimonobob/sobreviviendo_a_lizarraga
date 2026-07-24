@@ -11,13 +11,13 @@ import {
 import { waterfall, yearIndex } from "../../lib/finance";
 import { soles, axisMillones } from "../../lib/format";
 import { ink, flow } from "../../lib/palette";
-import { StaticLegend } from "../ui/Legend";
+import { ResponsiveLegend } from "../ui/Legend";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
 import { ChartBox } from "../ui/ChartBox";
 
 const kindColor = (k) => (k === "anchor" ? flow.total : k === "up" ? flow.up : flow.down);
 
-export function IncomeWaterfall({ data, year, chart }) {
+export function IncomeWaterfall({ data, year, title, subtitle, chart }) {
   const i = yearIndex(data, year);
   const steps = waterfall(data, i).map((s) => ({
     ...s,
@@ -60,17 +60,27 @@ export function IncomeWaterfall({ data, year, chart }) {
     );
   };
 
+  const legendItems = [
+    { id: "a", label: "Subtotal", color: flow.total },
+    { id: "u", label: "Suma", color: flow.up },
+    { id: "d", label: "Resta", color: flow.down },
+  ];
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <StaticLegend
-        items={[
-          { id: "a", label: "Subtotal", color: flow.total },
-          { id: "u", label: "Suma", color: flow.up },
-          { id: "d", label: "Resta", color: flow.down },
-        ]}
-      />
-      <div className="min-h-0 flex-1">
-        <ChartBox w={chart?.w} h={chart?.h}>
+      <div className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-baseline gap-2 min-w-0">
+          {title && (
+            <h2 className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink shrink-0">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-2">
+        <div className="min-h-0 flex-1">
+          <ChartBox w={chart?.w} h={chart?.h}>
           <BarChart
             layout="vertical"
             data={steps}
@@ -104,6 +114,8 @@ export function IncomeWaterfall({ data, year, chart }) {
             </Bar>
           </BarChart>
         </ChartBox>
+        </div>
+        <ResponsiveLegend items={legendItems} />
       </div>
     </div>
   );

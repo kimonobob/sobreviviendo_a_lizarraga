@@ -40,6 +40,11 @@
   --seq-strong: #184f95;
   --seq-mid: #2a78d6;
   --seq-soft: #9ec5f4;
+
+  /* Mapa de operaciones */
+  --map-bg: #f0f0ec;
+  --map-water: #e2e8f0;
+  --map-glow: rgba(214, 0, 28, 0.25);
 }
 
 :root[data-theme="dark"] {
@@ -71,6 +76,10 @@
   --seq-strong: #86b6ef;
   --seq-mid: #3987e5;
   --seq-soft: #184f95;
+
+  --map-bg: #161616;
+  --map-water: #1a2332;
+  --map-glow: rgba(239, 59, 82, 0.3);
 }
 
 html,
@@ -126,12 +135,76 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Grid del dashboard a pantalla completa (filas que sí pueden encoger) */
+/* ============================================================
+   Layout del dashboard — sidebar izquierdo + área principal
+   ============================================================ */
+
+/* Desktop: columnas fijas */
 @media (min-width: 1024px) {
-  .dash-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: minmax(0, 1.12fr) minmax(0, 1fr) minmax(0, 1.12fr);
+  .dash-col {
+    min-height: 0;
   }
+}
+
+/* ============================================================
+   Dropdown de ratios
+   ============================================================ */
+.ratio-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin-top: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-hair);
+  background: var(--surface-1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  animation: dropdownSlide 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Mapa de operaciones — efectos hover y glow
+   ============================================================ */
+.country-path {
+  transition: fill 200ms ease, filter 200ms ease, transform 200ms ease;
+  cursor: pointer;
+  transform-origin: center;
+}
+
+.country-path:hover,
+.country-path.active {
+  filter: brightness(1.2) drop-shadow(0 0 6px var(--map-glow));
+}
+
+.country-path.sede {
+  stroke: var(--brand);
+  stroke-width: 1.2;
+}
+
+.country-label {
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.map-dot-grid {
+  background-image: radial-gradient(circle, var(--gridline) 0.5px, transparent 0.5px);
+  background-size: 12px 12px;
 }
 
 /* Transiciones del Marimekko (SVG a mano) */
@@ -152,8 +225,12 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .mk-rect,
-  .mk-label {
+  .mk-label,
+  .country-path,
+  .country-label,
+  .ratio-dropdown {
     transition: none;
+    animation: none;
   }
 }
 

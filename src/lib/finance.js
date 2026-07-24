@@ -35,34 +35,34 @@ export function waterfall(data, i) {
   const v = (id) => z(erVals(data, id)[i]);
   const steps = [
     { id: "ingresos", label: "Ingresos", value: v("ingresos") },
-    { id: "costo_ventas", label: "Costo de ventas", value: v("costo_ventas") },
-    { id: "utilidad_bruta", label: "Utilidad bruta", value: v("utilidad_bruta") },
+    { id: "costo_ventas", label: "Costo ventas", value: v("costo_ventas") },
+    { id: "utilidad_bruta", label: "Ut. bruta", value: v("utilidad_bruta") },
     {
       id: "gastos_op",
-      label: "Gastos operativos",
+      label: "Gastos oper.",
       value:
         v("gastos_venta") +
         v("gastos_admin") +
         v("derivados_mp") +
         v("otros_ingresos_gastos"),
     },
-    { id: "utilidad_operativa", label: "Utilidad operativa", value: v("utilidad_operativa") },
+    { id: "utilidad_operativa", label: "Ut. operativa", value: v("utilidad_operativa") },
     {
       id: "financiero",
-      label: "Resultado financiero",
+      label: "Rdo. financiero",
       value:
         v("ingresos_financieros") +
         v("gastos_financieros") +
         v("diferencia_cambio") +
         v("perdida_derivados"),
     },
-    { id: "part_subsidiarias", label: "Part. subsidiarias", value: v("part_subsidiarias") },
+    { id: "part_subsidiarias", label: "Part. subsid.", value: v("part_subsidiarias") },
     {
       id: "impuesto",
-      label: "Impuesto y otros",
+      label: "Impuesto+otros",
       value: v("impuesto") + v("discontinuadas"),
     },
-    { id: "utilidad_neta", label: "Utilidad neta", value: v("utilidad_neta") },
+    { id: "utilidad_neta", label: "Ut. neta", value: v("utilidad_neta") },
   ];
 
   let cumul = 0;

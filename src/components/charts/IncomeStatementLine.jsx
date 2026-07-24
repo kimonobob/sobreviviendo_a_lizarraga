@@ -11,7 +11,7 @@ import {
 import { erVals } from "../../lib/finance";
 import { axisMillones, soles } from "../../lib/format";
 import { ink } from "../../lib/palette";
-import { ToggleLegend } from "../ui/Legend";
+import { ResponsiveLegend } from "../ui/Legend";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
 import { ChartBox } from "../ui/ChartBox";
 
@@ -52,7 +52,7 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
-export function IncomeStatementLine({ data, markYear, chart }) {
+export function IncomeStatementLine({ data, markYear, title, subtitle, chart }) {
   const rows = buildRows(data);
   const [active, setActive] = useState(SERIES.map((s) => s.id));
   const toggle = (id) =>
@@ -60,29 +60,39 @@ export function IncomeStatementLine({ data, markYear, chart }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <ToggleLegend items={SERIES} active={active} onToggle={toggle} />
-      <div className="min-h-0 flex-1">
-        <ChartBox w={chart?.w} h={chart?.h}>
+      <div className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-baseline gap-2 min-w-0">
+          {title && (
+            <h2 className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink shrink-0">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-2">
+        <div className="min-h-0 flex-1">
+          <ChartBox w={chart?.w} h={chart?.h}>
           <LineChart data={rows} margin={{ top: 6, right: 12, bottom: 2, left: 4 }}>
             <CartesianGrid stroke={ink.grid} vertical={false} />
             <XAxis
               dataKey="year"
-              tick={{ fill: ink.muted, fontSize: 11 }}
+              tick={{ fill: ink.muted, fontSize: 9 }}
               tickLine={false}
               axisLine={{ stroke: ink.baseline }}
               minTickGap={10}
             />
             <YAxis
               tickFormatter={axisMillones}
-              tick={{ fill: ink.muted, fontSize: 11 }}
+              tick={{ fill: ink.muted, fontSize: 9 }}
               tickLine={false}
               axisLine={false}
-              width={46}
+              width={38}
               label={{
                 value: "S/ millones",
                 angle: -90,
                 position: "insideLeft",
-                style: { fill: ink.muted, fontSize: 10, textAnchor: "middle" },
+                style: { fill: ink.muted, fontSize: 8, textAnchor: "middle" },
               }}
             />
             <ReferenceLine y={0} stroke={ink.baseline} />
@@ -108,6 +118,8 @@ export function IncomeStatementLine({ data, markYear, chart }) {
             )}
           </LineChart>
         </ChartBox>
+        </div>
+        <ResponsiveLegend items={SERIES} active={active} onToggle={toggle} interactive />
       </div>
     </div>
   );

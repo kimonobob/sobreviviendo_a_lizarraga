@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFinancials } from "./data/useFinancials";
-import { Dashboard } from "./sections/Dashboard";
+import { Dashboard, KpiStrip } from "./sections/Dashboard";
 import { YearSelector } from "./components/ui/YearSelector";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 
@@ -53,6 +53,7 @@ export default function App() {
             </p>
           </div>
         </div>
+        <KpiStrip data={data} year={selYear} />
         <div className="flex items-center gap-2.5">
           <YearSelector years={years} value={selYear} onChange={setYear} />
           <button

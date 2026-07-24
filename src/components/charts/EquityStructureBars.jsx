@@ -11,7 +11,7 @@ import {
 import { financingStructure } from "../../lib/finance";
 import { axisMillones, soles, pct } from "../../lib/format";
 import { ink } from "../../lib/palette";
-import { StaticLegend } from "../ui/Legend";
+import { ResponsiveLegend } from "../ui/Legend";
 import { SegToggle } from "../ui/Toggle";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
 import { ChartBox } from "../ui/ChartBox";
@@ -19,7 +19,7 @@ import { ChartBox } from "../ui/ChartBox";
 const PASIVO = "var(--series-2)";
 const PATRIM = "var(--series-1)";
 
-export function EquityStructureBars({ data, markYear, chart }) {
+export function EquityStructureBars({ data, markYear, title, subtitle, chart }) {
   const [mode, setMode] = useState("abs"); // abs | pct
   const base = financingStructure(data);
   const rows = base.map((r) => ({
@@ -41,15 +41,22 @@ export function EquityStructureBars({ data, markYear, chart }) {
     );
   };
 
+  const legendItems = [
+    { id: "patrimonio", label: "Patrimonio", color: PATRIM },
+    { id: "pasivo", label: "Pasivo", color: PASIVO },
+  ];
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <StaticLegend
-          items={[
-            { id: "patrimonio", label: "Patrimonio", color: PATRIM },
-            { id: "pasivo", label: "Pasivo", color: PASIVO },
-          ]}
-        />
+      <div className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-baseline gap-2 min-w-0">
+          {title && (
+            <h2 className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink shrink-0">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
+          )}
+        </div>
         <SegToggle
           value={mode}
           onChange={setMode}
@@ -57,10 +64,12 @@ export function EquityStructureBars({ data, markYear, chart }) {
             { value: "abs", label: "Montos" },
             { value: "pct", label: "%" },
           ]}
+          size="xs"
         />
       </div>
-      <div className="min-h-0 flex-1">
-        <ChartBox w={chart?.w} h={chart?.h}>
+      <div className="flex min-h-0 flex-1 gap-2">
+        <div className="min-h-0 flex-1">
+          <ChartBox w={chart?.w} h={chart?.h}>
           <BarChart data={rows} margin={{ top: 8, right: 12, bottom: 4, left: 4 }} barCategoryGap="18%">
             <CartesianGrid stroke={ink.grid} vertical={false} />
             <XAxis
@@ -97,6 +106,8 @@ export function EquityStructureBars({ data, markYear, chart }) {
             </Bar>
           </BarChart>
         </ChartBox>
+        </div>
+        <ResponsiveLegend items={legendItems} />
       </div>
     </div>
   );

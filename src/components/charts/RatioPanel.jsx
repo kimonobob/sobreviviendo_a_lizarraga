@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   LineChart,
   Line,
@@ -36,7 +36,7 @@ const DEFAULT = ["roa", "roe"];
 
 // `selected`/`mode` pueden venir controlados (para compartir estado con la
 // versión de impresión); si no, la tarjeta maneja su propio estado.
-export function RatioPanel({ data, markYear, selected: selProp, onSelected, mode: modeProp, onMode, chartOnly = false, chart }) {
+export function RatioPanel({ data, markYear, title, subtitle, selected: selProp, onSelected, mode: modeProp, onMode, chartOnly = false, chart }) {
   const { flat, color } = useFlatRatios(data);
   const byId = useMemo(() => Object.fromEntries(flat.map((r) => [r.id, r])), [flat]);
   const [selInner, setSelInner] = useState(DEFAULT);
@@ -48,6 +48,19 @@ export function RatioPanel({ data, markYear, selected: selProp, onSelected, mode
     (onSelected ?? setSelInner)(next);
   };
   const setMode = onMode ?? setModeInner;
+
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggle = (id) =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -104,6 +117,12 @@ export function RatioPanel({ data, markYear, selected: selProp, onSelected, mode
     if (singleFormato === "x") return `${v.toFixed(1)}x`;
     return v.toFixed(1);
   };
+
+  const selectedLegend = selected.map((id) => ({
+    id,
+    label: byId[id].label.replace(/\s*\(.*?\)\s*/g, ""),
+    color: color[id],
+  }));
 
   const chartBlock = (
     <div className="min-h-0 flex-1">
@@ -170,58 +189,111 @@ export function RatioPanel({ data, markYear, selected: selProp, onSelected, mode
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      {/* selector de ratios agrupado */}
-      <div className="flex shrink-0 flex-col gap-1">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[11px] text-ink-muted">
-            Elige los ratios a comparar · {selected.length} activos
-          </span>
-          <SegToggle
-            value={mode}
-            onChange={setMode}
-            options={[
-              { value: "valor", label: "Valor" },
-              { value: "index", label: "Base 100" },
-            ]}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          {data.ratios.grupos.map((g) => (
-            <div key={g.id} className="flex flex-wrap items-center gap-1">
-              <span className="w-full text-[9px] uppercase tracking-wide text-ink-muted sm:w-20 sm:shrink-0">
-                {g.label}
-              </span>
-              {g.items.filter((it) => it.id !== "roe_dupont").map((it) => {
-                const on = selected.includes(it.id);
-                return (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => toggle(it.id)}
-                    className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs transition-colors ${
-                      on
-                        ? "border-transparent text-ink"
-                        : "border-hair text-ink-secondary hover:border-ink-muted"
-                    }`}
-                    style={on ? { background: "var(--plane)" } : undefined}
-                  >
-                    <span
-                      className="inline-block h-2 w-2 rounded-sm"
-                      style={{ background: on ? color[it.id] : "var(--baseline)" }}
-                    />
-                    {it.label.replace(/\s*\(.*?\)\s*/g, "")}
-                  </button>
-                );
-              })}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="relative shrink-0" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex items-center gap-1.5 rounded-md border border-hair bg-plane px-2 py-0.5 text-[9px] font-medium text-ink transition-colors hover:bg-surface"
+          >
+            Ratios · {selected.length} activos
+            <svg
+              className={`h-3 w-3 transition-transform text-ink-secondary ${isOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          <div
+            className={`absolute left-0 top-full z-50 mt-1 w-72 origin-top-left rounded-lg border border-hair bg-surface p-2 shadow-lg transition-all duration-200 ${
+              isOpen ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+            }`}
+          >
+            <div className="flex max-h-[400px] flex-col gap-2 overflow-y-auto pr-1">
+              {data.ratios.grupos.map((g) => (
+                <div key={g.id} className="flex flex-col gap-0.5">
+                  <span className="text-[9px] uppercase tracking-wider text-ink-muted font-medium px-1">
+                    {g.label}
+                  </span>
+                  <div className="flex flex-col">
+                    {g.items.filter((it) => it.id !== "roe_dupont").map((it) => {
+                      const on = selected.includes(it.id);
+                      return (
+                        <button
+                          key={it.id}
+                          type="button"
+                          onClick={() => toggle(it.id)}
+                          className={`flex items-center gap-1.5 rounded px-1.5 py-0.5 text-left text-[10px] transition-colors hover:bg-plane ${
+                            on ? "text-ink" : "text-ink-secondary"
+                          }`}
+                        >
+                          <span
+                            className="inline-block h-2 w-2 shrink-0 rounded-sm"
+                            style={{ background: on ? color[it.id] : "var(--baseline)" }}
+                          />
+                          <span className="truncate">
+                            {it.label.replace(/\s*\(.*?\)\s*/g, "")}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+
+        <div className="flex items-baseline gap-2 min-w-0 flex-1">
+          {title && (
+            <h2 className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink shrink-0">
+              {title}
+            </h2>
+          )}
+          {subtitle && (
+            <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
+          )}
+        </div>
+
+        <SegToggle
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "valor", label: "Valor" },
+            { value: "index", label: "Base 100" },
+          ]}
+          size="xs"
+        />
+      </div>
+
+      <div className="flex min-h-0 flex-1 gap-2">
+        {chartBlock}
+        {/* Desktop: leyenda vertical al derecho */}
+        <div className="hidden flex-col items-start justify-center gap-2 lg:flex shrink-0">
+          {selectedLegend.map((it) => (
+            <span key={it.id} className="flex items-center gap-1.5 text-[9px] text-ink-secondary whitespace-nowrap">
+              <span className="inline-block h-2 w-2 shrink-0 rounded-sm" style={{ background: it.color }} />
+              {it.label}
+            </span>
           ))}
         </div>
       </div>
 
-      {/* gráfico */}
-      {chartBlock}
+      {/* Móvil: leyenda horizontal */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 lg:hidden shrink-0">
+        {selectedLegend.map((it) => (
+          <span key={it.id} className="flex items-center gap-1.5 text-[9px] text-ink-secondary">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-sm" style={{ background: it.color }} />
+            {it.label}
+          </span>
+        ))}
+      </div>
+
       {mode === "valor" && !singleFormato && (
-        <p className="text-xs text-ink-muted">
+        <p className="text-[9px] text-ink-muted shrink-0">
           Seleccionaste ratios de distinta unidad (x, %, días). Para comparar tendencias usa{" "}
           <span className="text-ink-secondary">Base 100</span>.
         </p>
@@ -229,3 +301,4 @@ export function RatioPanel({ data, markYear, selected: selProp, onSelected, mode
     </div>
   );
 }
+
