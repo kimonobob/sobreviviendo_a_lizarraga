@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Tokens de diseño — reporte de analista, sobrio.
+   Paleta de datos validada (CVD-safe) en claro y oscuro.
+   ============================================================ */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-1: #fcfcfb; /* superficie de gráfico / tarjeta */
+  --plane: #f9f9f7; /* fondo de página */
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border-hair: rgba(11, 11, 11, 0.1);
+
+  /* Marca */
+  --brand: #d6001c;
+
+  /* Paleta categórica (orden fijo, validado en claro) */
+  --series-1: #d6001c; /* rojo Alicorp — serie protagonista */
+  --series-2: #2a78d6; /* azul */
+  --series-3: #008300; /* verde */
+  --series-4: #eda100; /* ámbar */
+  --series-5: #1baf7a; /* aqua */
+  --series-6: #4a3aa7; /* violeta */
+  --series-7: #eb6834; /* naranja */
+
+  /* Flujos (cascada) — estado, con etiquetas directas */
+  --flow-up: #0a8a0a;
+  --flow-down: #d03b3b;
+  --flow-total: #2a78d6;
+
+  /* Secuencial (magnitud, un solo tono) */
+  --seq-strong: #184f95;
+  --seq-mid: #2a78d6;
+  --seq-soft: #9ec5f4;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-1: #1a1a19;
+  --plane: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --gridline: #2c2c2a;
+  --baseline: #383835;
+  --border-hair: rgba(255, 255, 255, 0.1);
+
+  --brand: #ef3b52;
+
+  --series-1: #ef3b52;
+  --series-2: #3987e5;
+  --series-3: #008300;
+  --series-4: #c98500;
+  --series-5: #199e70;
+  --series-6: #9085e9;
+  --series-7: #d95926;
+
+  --flow-up: #0ca30c;
+  --flow-down: #e05555;
+  --flow-total: #3987e5;
+
+  --seq-strong: #86b6ef;
+  --seq-mid: #3987e5;
+  --seq-soft: #184f95;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Pantalla: sin scroll de página (dashboard ocupa el viewport completo) */
+html,
+body {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Reporte de impresión: siempre montado, fuera de pantalla, medido a ancho A4 */
+.print-report {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 1040px;
+}
+.print-only {
+  display: none;
+}
+
+/* Cifras alineadas verticalmente */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Scroll horizontal contenido para tablas/gráficos anchos */
+.scroll-x {
+  overflow-x: auto;
+}
+
+/* Recharts: quita el rectángulo de foco punteado */
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Grid del dashboard a pantalla completa (filas que sí pueden encoger) */
+@media (min-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1.12fr) minmax(0, 1fr) minmax(0, 1.12fr);
+  }
+}
+
+/* Transiciones del Marimekko (SVG a mano) */
+.mk-rect {
+  transition:
+    x 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    y 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    height 640ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mk-label {
+  transition:
+    x 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    y 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 320ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-rect,
+  .mk-label {
+    transition: none;
+  }
+}
+
+::selection {
+  background: rgba(214, 0, 28, 0.18);
+}
+
+/* ============================================================
+   Impresión — alta calidad, tema claro forzado, respeta selección.
+   El balance se imprime como 16 radiales (todos los años).
+   ============================================================ */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 9mm;
+  }
+
+  /* fuerza tokens claros sin importar el tema en pantalla */
+  :root,
+  :root[data-theme="dark"],
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --surface-1: #ffffff;
+    --plane: #ffffff;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #6b6a66;
+    --gridline: #e1e0d9;
+    --baseline: #b8b7b0;
+    --border-hair: rgba(11, 11, 11, 0.15);
+    --brand: #d6001c;
+    --series-1: #d6001c;
+    --series-2: #2a78d6;
+    --series-3: #008300;
+    --series-4: #eda100;
+    --series-5: #1baf7a;
+    --series-6: #4a3aa7;
+    --series-7: #eb6834;
+    --flow-up: #0a8a0a;
+    --flow-down: #d03b3b;
+    --flow-total: #2a78d6;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-report {
+    position: static !important;
+    left: 0 !important;
+    width: 1040px !important;
+    max-width: 100%;
+  }
+  .print-page-break {
+    break-before: page;
+  }
+  .break-avoid {
+    break-inside: avoid;
+  }
+}
