@@ -28,7 +28,7 @@ export function ZoomModal({ open, onClose, title, subtitle, children }) {
       onClick={onClose}
     >
       <div
-        className="relative mx-4 flex max-h-[70vh] w-full max-w-[70vw] flex-col rounded-xl border border-hair bg-surface shadow-2xl"
+        className="relative mx-4 flex h-[70vh] w-full max-w-[70vw] flex-col rounded-xl border border-hair bg-surface shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-hair px-5 py-3">
@@ -55,7 +55,7 @@ export function ZoomModal({ open, onClose, title, subtitle, children }) {
             </svg>
           </button>
         </header>
-        <div className="flex min-h-0 flex-1 p-4">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
           {children}
         </div>
       </div>

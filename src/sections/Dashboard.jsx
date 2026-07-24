@@ -181,7 +181,7 @@ export function Dashboard({ data, year, ratios }) {
 
       {/* ---- Modal de zoom ---- */}
       <ZoomModal open={!!zoomed} onClose={closeZoom} title={zoomed?.title} subtitle={zoomed?.subtitle}>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
           {zoomed?.id === "income" && <IncomeStatementLine data={data} markYear={year} title="Estado de Resultados" subtitle="Ventas · costos · gastos · utilidad neta · 2010–2025" />}
           {zoomed?.id === "ratios" && <RatioPanel data={data} markYear={year} title="Panel de Ratios" subtitle="Elige los ratios a comparar" selected={ratios.selected} mode={ratios.mode} onSelected={ratios.setSelected} onMode={ratios.setMode} />}
           {zoomed?.id === "waterfall" && <IncomeWaterfall data={data} year={year} title="Cascada del Resultado" subtitle={`Ingresos → utilidad neta · ${year}`} />}
