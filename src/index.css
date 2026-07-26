@@ -223,12 +223,22 @@ body {
     opacity 320ms ease;
 }
 
+/* Transición fade-in para cambio de vista / año */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mk-rect,
   .mk-label,
   .country-path,
   .country-label,
-  .ratio-dropdown {
+  .ratio-dropdown,
+  .animate-fade-in {
     transition: none;
     animation: none;
   }

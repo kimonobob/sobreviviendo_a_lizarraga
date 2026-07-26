@@ -1,14 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFinancials } from "./data/useFinancials";
 import { Dashboard, KpiStrip } from "./sections/Dashboard";
+import { AnnualDashboard } from "./sections/AnnualDashboard";
 import { YearSelector } from "./components/ui/YearSelector";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 
+function initialFromURL(param, fallback) {
+  try {
+    const v = new URLSearchParams(location.search).get(param);
+    return v ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function initialYear() {
+  const raw = initialFromURL("year", null);
+  if (raw == null) return null;
+  const q = Number(raw);
+  return Number.isFinite(q) && q >= 2010 && q <= 2025 ? q : null;
+}
+
+function syncURL(key, value) {
+  const url = new URL(location.href);
+  if (value == null || value === "" || value === "serie") {
+    url.searchParams.delete(key);
+  } else {
+    url.searchParams.set(key, value);
+  }
+  history.replaceState(null, "", url);
+}
+
 export default function App() {
   const { data, error } = useFinancials();
-  const [year, setYear] = useState(null);
+  const [year, setYear] = useState(initialYear);
+  const [view, setView] = useState(() => initialFromURL("view", "serie"));
   const [ratSelected, setRatSelected] = useState(["roa", "roe"]);
   const [ratMode, setRatMode] = useState("valor");
+
+  useEffect(() => { syncURL("year", year); }, [year]);
+  useEffect(() => { syncURL("view", view); }, [view]);
+
+  const toggleView = useCallback(() => {
+    setView((v) => (v === "serie" ? "anual" : "serie"));
+  }, []);
 
   if (error) {
     return (
@@ -30,6 +65,7 @@ export default function App() {
 
   const years = data.meta.years;
   const selYear = year ?? years[years.length - 1];
+  const isAnual = view === "anual";
   const ratios = {
     selected: ratSelected,
     mode: ratMode,
@@ -55,6 +91,19 @@ export default function App() {
         </div>
         <KpiStrip data={data} year={selYear} />
         <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={toggleView}
+            className={`flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors ${
+              isAnual
+                ? "border-brand bg-brand text-white"
+                : "border-hair bg-surface text-ink-secondary hover:border-brand hover:text-brand"
+            }`}
+            title={isAnual ? "Volver a vista de serie (2010–2025)" : "Cambiar a vista anual (fotografía de un año)"}
+          >
+            <span aria-hidden>{isAnual ? "📈" : "▦"}</span>
+            {isAnual ? "Ver serie" : "Vista anual"}
+          </button>
           <YearSelector years={years} value={selYear} onChange={setYear} />
           <button
             type="button"
@@ -68,8 +117,18 @@ export default function App() {
         </div>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto p-3 lg:flex lg:flex-col lg:overflow-hidden">
-        <Dashboard data={data} year={selYear} ratios={ratios} />
+      <main
+        className={
+          isAnual
+            ? "min-h-0 flex-1 overflow-y-auto p-3"
+            : "min-h-0 flex-1 overflow-y-auto p-3 lg:flex lg:flex-col lg:overflow-hidden"
+        }
+      >
+        {isAnual ? (
+          <AnnualDashboard data={data} year={selYear} ratios={ratios} />
+        ) : (
+          <Dashboard data={data} year={selYear} ratios={ratios} />
+        )}
       </main>
     </div>
   );

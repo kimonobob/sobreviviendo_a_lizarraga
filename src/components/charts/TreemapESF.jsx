@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { yearIndex, block } from "../../lib/finance";
 import { soles, pct } from "../../lib/format";
 
@@ -43,7 +43,7 @@ function Tile({ t, activo, hovered, selected, onHover, onSelect, style }) {
       onMouseEnter={() => onHover(t.id)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onSelect(selected === t.id ? null : t.id)}
-      className="group absolute overflow-hidden rounded-lg text-left text-white transition-all duration-200"
+      className="group absolute overflow-hidden rounded-[3px] text-left text-white transition-all duration-200"
       style={{
         ...style,
         background: `linear-gradient(135deg, ${t.g[0]}, ${t.g[1]})`,
@@ -87,14 +87,25 @@ export function TreemapESF({ data, year }) {
   };
 
   const active = hovered ?? selected;
-  const detail = useMemo(() => (selected ? detailOf(data, selected, i) : null), [data, selected, i]);
+  const detail = useMemo(() => (active ? detailOf(data, active, i) : null), [data, active, i]);
+
+  const wrapRef = useRef(null);
+  const [pos, setPos] = useState({ x: 0, y: 0, w: 1, h: 1 });
+  const onMove = (e) => {
+    const r = wrapRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setPos({ x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height });
+  };
 
   const GAP = 6;
   const pasivoH = (pasivo / financ) * 100;
 
+  const flipX = pos.x > pos.w * 0.5;
+  const flipY = pos.y > pos.h * 0.55;
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="relative min-h-0 flex-1">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div ref={wrapRef} className="relative min-h-0 flex-1" onMouseMove={onMove}>
         <Tile
           t={tiles.activo}
           activo={activo}
@@ -122,27 +133,40 @@ export function TreemapESF({ data, year }) {
           onSelect={setSelected}
           style={{ right: 0, bottom: 0, width: `calc(50% - ${GAP / 2}px)`, height: `calc(${100 - pasivoH}% - ${GAP / 2}px)` }}
         />
-      </div>
 
-      {/* detalle / leyenda */}
-      <div className="flex min-h-[42px] shrink-0 items-center gap-3 rounded-md border border-hair bg-plane px-3 py-1.5">
-        {detail ? (
-          <>
-            <span className="text-[11px] font-semibold text-ink">{tiles[selected].label}:</span>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5">
+        {/* Tooltip flotante: composición del bloque, sigue al cursor (hover) y queda fijo al hacer clic */}
+        {detail && (
+          <div
+            className="pointer-events-none absolute z-10 w-[220px] rounded-[4px] border border-hair bg-surface px-3 py-2 shadow-lg"
+            style={{
+              left: pos.x + (flipX ? -12 : 12),
+              top: pos.y + (flipY ? -12 : 12),
+              transform: `translate(${flipX ? "-100%" : "0"}, ${flipY ? "-100%" : "0"})`,
+            }}
+          >
+            <div className="mb-1.5 flex items-baseline justify-between border-b border-hair pb-1">
+              <span className="text-[11px] font-semibold text-ink">{tiles[active].label}</span>
+              <span className="tnum text-[10px] text-ink-muted">{pct(tiles[active].value / activo, 0)}</span>
+            </div>
+            <div className="tnum mb-1.5 text-sm font-semibold text-ink">{soles(tiles[active].value)}</div>
+            <div className="space-y-0.5">
               {detail.map((d) => (
-                <span key={d.label} className="flex items-center gap-1.5 text-[11px] text-ink-secondary">
-                  <span className="truncate">{d.label}</span>
-                  <span className="tnum font-medium text-ink">{soles(d.value)}</span>
-                </span>
+                <div key={d.label} className="flex items-center justify-between gap-2 text-[11px]">
+                  <span className="min-w-0 flex-1 truncate text-ink-secondary" title={d.label}>{d.label}</span>
+                  <span className="tnum shrink-0 whitespace-nowrap font-medium text-ink">{soles(d.value)}</span>
+                </div>
               ))}
             </div>
-          </>
-        ) : (
-          <span className="text-[11px] text-ink-muted">
-            Activo <span className="tnum text-ink-secondary">{soles(activo)}</span> = Pasivo{" "}
-            <span className="tnum text-ink-secondary">{soles(pasivo)}</span> + Patrimonio{" "}
-            <span className="tnum text-ink-secondary">{soles(patrimonio)}</span> · pasa el mouse o haz clic en un bloque
+            {selected === active && (
+              <div className="mt-1.5 border-t border-hair pt-1 text-[9.5px] text-ink-muted">fijado · clic para soltar</div>
+            )}
+          </div>
+        )}
+
+        {/* Pista sutil cuando no hay bloque activo */}
+        {!active && (
+          <span className="pointer-events-none absolute bottom-1.5 left-2 text-[9px] text-ink-muted">
+            Activo = Pasivo + Patrimonio · pasa el mouse o haz clic
           </span>
         )}
       </div>

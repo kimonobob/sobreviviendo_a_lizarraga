@@ -1,0 +1,569 @@
+{
+  "meta": {
+    "empresa": "Alicorp S.A.A.",
+    "base": "EEFF Separados (SMV) 2011-2025",
+    "definicion_operacion": "Subsidiaria/asociada constituida o domiciliada en el país (Nota 1 y notas de inversiones/partes relacionadas).",
+    "advertencia": "Los EEFF separados no reportan ingresos/activos por país; el detalle por país del grupo está en los EEFF consolidados (no incluidos). Las marcas son de dominio público y no constan en los EEFF.",
+    "grupo_consolidado_2025": {
+      "total_activo_miles_soles": 10668796,
+      "ventas_miles_soles": 11763822,
+      "utilidad_neta_miles_soles": 459239,
+      "fuente": "Nota 1, informe separado 2025"
+    }
+  },
+  "paises": [
+    {
+      "id": "pe",
+      "iso3": "PER",
+      "pais": "Perú",
+      "emoji": "🇵🇪",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2010,
+      "rol": "Sede / matriz · producción · comercial",
+      "lineas_negocio": "Consumo masivo, B2B/industrial, Acuicultura (Vitapro), Molienda (hasta 2024), Cuidado del hogar (Intradevco)",
+      "entidades": "Alicorp S.A.A. (matriz), Alicorp Inversiones S.A. (holding), Vitapro S.A., Global Alimentos S.A.C., Intradevco Industrial S.A., Industrias del Espino S.A., Industrias de Grasas y Aceites S.A.C., Apudex S.A.C., Downford Corporation",
+      "marcas": "Primor, Bolívar, Don Vittorio, Blanca Flor, Lavaggi, Sapolio, Sayón (descontinuada 2024)",
+      "fuente": "Informe 2025 Notas 1, 21 y 37 (todos los años)"
+    },
+    {
+      "id": "ec",
+      "iso3": "ECU",
+      "pais": "Ecuador",
+      "emoji": "🇪🇨",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2010,
+      "rol": "Producción · comercial",
+      "lineas_negocio": "Consumo masivo; Acuicultura (Vitapro Ecuador)",
+      "entidades": "Alicorp Ecuador S.A. (≈99.99%), Vitapro Ecuador Cía. Ltda.",
+      "marcas": "Portafolio regional de consumo masivo",
+      "fuente": "Nota 21 2025 (Alicorp Ecuador 99.99%, S/36,659 mil) · Nota 37 (Vitapro Ecuador). Presente 2011-2025"
+    },
+    {
+      "id": "co",
+      "iso3": "COL",
+      "pais": "Colombia",
+      "emoji": "🇨🇴",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2010,
+      "rol": "Comercial · producción",
+      "lineas_negocio": "Consumo masivo",
+      "entidades": "Alicorp Colombia S.A. (94-95%)",
+      "marcas": "Portafolio regional de consumo masivo",
+      "fuente": "Notas de inversiones 2011-2025 · Nota 37 2025 (S/851 mil por cobrar)"
+    },
+    {
+      "id": "cl",
+      "iso3": "CHL",
+      "pais": "Chile",
+      "emoji": "🇨🇱",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2012,
+      "rol": "Producción (acuicultura)",
+      "lineas_negocio": "Acuicultura — nutrición para salmón",
+      "entidades": "Vitapro Chile S.A.; Grupo Salmofood (adquirido 2012)",
+      "marcas": "Salmofood",
+      "fuente": "Informe 2013 Nota 1 (adquisición Salmofood, nov-2012) · Nota 37 2025 (Vitapro Chile)"
+    },
+    {
+      "id": "hn",
+      "iso3": "HND",
+      "pais": "Honduras (Centroamérica)",
+      "emoji": "🇭🇳",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2010,
+      "rol": "Comercial · producción (acuicultura)",
+      "lineas_negocio": "Consumo masivo (Alicorp Honduras, hasta ~2019); Acuicultura (Vitapro Honduras)",
+      "entidades": "Alicorp Honduras S.A. (2010-2019); Vitapro Honduras S.A. de C.V. (2023-2025)",
+      "marcas": "Portafolio de consumo / acuicultura",
+      "fuente": "Notas de inversiones 2011-2019 (Alicorp Honduras) · Nota 37 2023-2025 (Vitapro Honduras)"
+    },
+    {
+      "id": "uy",
+      "iso3": "URY",
+      "pais": "Uruguay",
+      "emoji": "🇺🇾",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2019,
+      "rol": "Holding · (ex-molienda)",
+      "lineas_negocio": "Vehículo del grupo; negocio de Molienda discontinuado en 2024",
+      "entidades": "Alicorp Uruguay S.R.L. (desde ~2019)",
+      "marcas": "—",
+      "fuente": "Nota 37 2019-2025 · Nota 10 2025 (Molienda Bolivia+Uruguay vendida 2024)"
+    },
+    {
+      "id": "us",
+      "iso3": "USA",
+      "pais": "Estados Unidos",
+      "emoji": "🇺🇸",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2023,
+      "rol": "Comercial / trading",
+      "lineas_negocio": "Comercialización / trading de commodities",
+      "entidades": "Alicorp USA LLC (2023-2025); Downford Corporation (histórico)",
+      "marcas": "—",
+      "fuente": "Nota 37 2025 (Alicorp USA LLC, S/35,820 mil por cobrar)"
+    },
+    {
+      "id": "es",
+      "iso3": "ESP",
+      "pais": "España",
+      "emoji": "🇪🇸",
+      "estado": "actual",
+      "salida": null,
+      "desde": 2012,
+      "rol": "Holding (sin operación comercial directa)",
+      "lineas_negocio": "Vehículo holding de inversiones internacionales",
+      "entidades": "Alicorp Holdco España S.L. (desde 2012)",
+      "marcas": "—",
+      "fuente": "Informe 2013 Nota 1(v) · Nota 37 2025 (Alicorp Holdco España)"
+    },
+    {
+      "id": "bo",
+      "iso3": "BOL",
+      "pais": "Bolivia",
+      "emoji": "🇧🇴",
+      "estado": "desinvertido",
+      "salida": 2024,
+      "desde": 2018,
+      "rol": "Producción (aceites / molienda)",
+      "lineas_negocio": "Molienda, aceites y jabones",
+      "entidades": "Industrias de Aceite S.A. (marca Fino); Holdco Bolivia Inversiones S.A.; Alicorp Group Inversiones Bolivia",
+      "marcas": "Fino",
+      "fuente": "Informe 2019 Nota (adquisición 17-may-2018) · Informe 2025 Nota 10 (Molienda vendida en 2024)"
+    },
+    {
+      "id": "ar",
+      "iso3": "ARG",
+      "pais": "Argentina",
+      "emoji": "🇦🇷",
+      "estado": "desinvertido",
+      "salida": 2021,
+      "desde": 2010,
+      "rol": "Producción · comercial (Cono Sur)",
+      "lineas_negocio": "Consumo masivo: pastas, salsas, galletas, cuidado personal",
+      "entidades": "Alicorp Argentina S.C.A. y Subsidiarias (TVBC S.C.A., Sanford S.A.C.I.F.I. y A., Pastas Especiales S.A., Sulfargen S.A.)",
+      "marcas": "Sao, Okebon, Zorro, Plusbelle",
+      "fuente": "Notas de inversiones 2011-2021 (100%) · Informe 2021 Nota 1(e) (venta 3-dic-2021)"
+    },
+    {
+      "id": "br",
+      "iso3": "BRA",
+      "pais": "Brasil",
+      "emoji": "🇧🇷",
+      "estado": "desinvertido",
+      "salida": 2021,
+      "desde": 2012,
+      "rol": "Producción (pastas)",
+      "lineas_negocio": "Consumo masivo — pastas (NO acuicultura, como se rotuló en el mapa)",
+      "entidades": "Pastificio Santa Amália S.A.",
+      "marcas": "Santa Amália",
+      "fuente": "Informe 2013 Nota 1 (adquisición 2012) · Informe 2021 Nota 1(d) (venta 2021)"
+    }
+  ],
+  "timeline_entidades": [
+    {
+      "entidad": "Alicorp S.A.A. (matriz)",
+      "pais": "Perú",
+      "linea": "Consumo masivo / B2B",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Inversiones S.A. (holding)",
+      "pais": "Perú",
+      "linea": "Holding",
+      "anios_presente": [
+        2013,
+        2015,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Vitapro S.A.",
+      "pais": "Perú",
+      "linea": "Acuicultura",
+      "anios_presente": [
+        2015,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Global Alimentos S.A.C.",
+      "pais": "Perú",
+      "linea": "Consumo (cereales)",
+      "anios_presente": [
+        2015,
+        2017,
+        2019,
+        2021
+      ]
+    },
+    {
+      "entidad": "Intradevco Industrial S.A.",
+      "pais": "Perú",
+      "linea": "Cuidado del hogar (Sapolio)",
+      "anios_presente": [
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Industrias del Espino S.A.",
+      "pais": "Perú",
+      "linea": "Aceites / oleaginosas",
+      "anios_presente": [
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Downford Corporation",
+      "pais": "Perú/holding",
+      "linea": "Holding",
+      "anios_presente": [
+        2011,
+        2013,
+        2021
+      ]
+    },
+    {
+      "entidad": "Cernical Group S.A.",
+      "pais": "Perú",
+      "linea": "Holding (fusionada 2021)",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019
+      ]
+    },
+    {
+      "entidad": "Masterbread S.A.",
+      "pais": "Por confirmar",
+      "linea": "Panificación",
+      "anios_presente": [
+        2021,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Ecuador S.A.",
+      "pais": "Ecuador",
+      "linea": "Consumo masivo",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Vitapro Ecuador Cía. Ltda.",
+      "pais": "Ecuador",
+      "linea": "Acuicultura",
+      "anios_presente": [
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Colombia S.A.",
+      "pais": "Colombia",
+      "linea": "Consumo masivo",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Honduras S.A.",
+      "pais": "Honduras",
+      "linea": "Consumo masivo",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019
+      ]
+    },
+    {
+      "entidad": "Vitapro Honduras S.A. de C.V.",
+      "pais": "Honduras",
+      "linea": "Acuicultura",
+      "anios_presente": [
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Grupo Salmofood",
+      "pais": "Chile",
+      "linea": "Acuicultura (salmón)",
+      "anios_presente": [
+        2013
+      ]
+    },
+    {
+      "entidad": "Vitapro Chile S.A.",
+      "pais": "Chile",
+      "linea": "Acuicultura",
+      "anios_presente": [
+        2013,
+        2017,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Uruguay S.R.L.",
+      "pais": "Uruguay",
+      "linea": "Holding / molienda",
+      "anios_presente": [
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp USA LLC",
+      "pais": "Estados Unidos",
+      "linea": "Comercial / trading",
+      "anios_presente": [
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Alicorp Holdco España S.L.",
+      "pais": "España",
+      "linea": "Holding",
+      "anios_presente": [
+        2013,
+        2019,
+        2021,
+        2023,
+        2025
+      ]
+    },
+    {
+      "entidad": "Industrias de Aceite S.A. (Fino)",
+      "pais": "Bolivia",
+      "linea": "Molienda / aceites",
+      "anios_presente": [
+        2019,
+        2021,
+        2023
+      ]
+    },
+    {
+      "entidad": "Alicorp Argentina S.C.A. y Subs.",
+      "pais": "Argentina",
+      "linea": "Consumo masivo",
+      "anios_presente": [
+        2011,
+        2013,
+        2015,
+        2017,
+        2019,
+        2021
+      ]
+    },
+    {
+      "entidad": "Pastificio Santa Amália S.A.",
+      "pais": "Brasil",
+      "linea": "Consumo (pastas)",
+      "anios_presente": [
+        2013,
+        2017,
+        2019,
+        2021
+      ]
+    }
+  ],
+  "exportaciones_por_anio": {
+    "2011": [
+      "Chile",
+      "Bolivia",
+      "Colombia",
+      "Ecuador",
+      "Venezuela",
+      "Haití",
+      "Guatemala",
+      "Costa Rica",
+      "Estados Unidos",
+      "Rep. Dominicana",
+      "Nicaragua",
+      "Canadá",
+      "Panamá",
+      "Mauritania",
+      "Curazao",
+      "China",
+      "Bahamas",
+      "Noruega",
+      "Japón",
+      "Honduras"
+    ],
+    "2013": [
+      "Ecuador",
+      "Chile",
+      "Panamá",
+      "Honduras",
+      "Bolivia",
+      "Haití",
+      "Papúa Nueva Guinea",
+      "Nicaragua",
+      "Guatemala",
+      "Estados Unidos",
+      "Colombia",
+      "Costa Rica",
+      "Venezuela",
+      "Belice",
+      "Canadá",
+      "Japón",
+      "Rep. Dominicana",
+      "Países Bajos",
+      "Alemania",
+      "Filipinas"
+    ],
+    "2015": [
+      "Bolivia",
+      "Chile",
+      "Ecuador",
+      "Haití",
+      "Colombia",
+      "Reino Unido"
+    ],
+    "2017": [
+      "Chile",
+      "Bolivia",
+      "Haití",
+      "Ecuador",
+      "Colombia"
+    ],
+    "2019": [
+      "Ecuador",
+      "Chile",
+      "Panamá",
+      "Bolivia",
+      "Honduras",
+      "Nicaragua",
+      "Haití",
+      "Colombia"
+    ],
+    "2021": [
+      "Ecuador",
+      "Chile",
+      "Panamá",
+      "Bolivia",
+      "Honduras",
+      "Nicaragua",
+      "Haití",
+      "Colombia"
+    ],
+    "2023": [
+      "Argentina",
+      "Bolivia",
+      "Chile",
+      "Colombia",
+      "Costa Rica",
+      "Ecuador",
+      "Estados Unidos",
+      "Honduras",
+      "Nicaragua",
+      "Panamá"
+    ],
+    "2025": [
+      "Bolivia",
+      "Chile",
+      "Colombia",
+      "Costa Rica",
+      "Ecuador",
+      "Estados Unidos",
+      "Honduras",
+      "Nicaragua",
+      "Panamá",
+      "Uruguay"
+    ]
+  },
+  "fuentes": [
+    {
+      "archivo": "Alicorp S.A.A. - EEFF Separados 2011.pdf",
+      "notas": "Nota 1 (exportaciones), Nota de inversiones financieras (subsidiarias y % participación)"
+    },
+    {
+      "archivo": "Alicorp S.A.A. Informe Auditado 2013.pdf",
+      "notas": "Nota 1 (exportaciones; adquisición Pastificio Santa Amália y Salmofood; Alicorp Holdco España), Nota de inversiones"
+    },
+    {
+      "archivo": "Alicorp SAA Separado 2015.pdf",
+      "notas": "Nota 1 (exportaciones; creación de Vitapro; Global Alimentos), Nota 10 inversiones método participación"
+    },
+    {
+      "archivo": "Informe Alicorp Individual 2017.pdf",
+      "notas": "Nota 1 (exportaciones), Nota 11 inversiones (Argentina, Honduras, Colombia, Ecuador), Nota 31 partes relacionadas"
+    },
+    {
+      "archivo": "Informe Auditado EEFF Separados 2019.pdf",
+      "notas": "Nota 1 (exportaciones; adquisición Industrias de Aceite/Fino en Bolivia 2018; Intradevco), Nota 10 inversiones, Nota 32 partes relacionadas"
+    },
+    {
+      "archivo": "Informes Separado 2021.pdf",
+      "notas": "Nota 1 (venta de Pastificio Santa Amália -Brasil- y de Alicorp Argentina -3-dic-2021)"
+    },
+    {
+      "archivo": "Informe Auditado EEFF Separados 2023.pdf",
+      "notas": "Nota 1 (exportaciones), Nota 22 inversiones, Nota 37 partes relacionadas (Vitapro Ecuador/Chile/Honduras, Fino/Ind. de Aceite)"
+    },
+    {
+      "archivo": "Informe Separado 2025 - ALICORP.pdf",
+      "notas": "Nota 1 (exportaciones y datos del consolidado), Nota 10 (Molienda Bolivia+Uruguay vendida 2024), Nota 21 (subsidiarias directas), Nota 37 (partes relacionadas por entidad)"
+    }
+  ],
+  "notas": [
+    "Alcance: 'operación' = subsidiaria/asociada constituida o domiciliada en el país (según Nota 1 y notas de inversiones/partes relacionadas de los EEFF SEPARADOS). Distinto de 'exportación', que es venta comercial sin sociedad local (ver hoja Exportaciones).",
+    "Los EEFF son SEPARADOS (matriz sola): no traen ingresos ni activos por país. El detalle por país del GRUPO está en los EEFF consolidados (no incluidos en la carpeta). Las marcas son de conocimiento público y no constan en los EEFF; se incluyen solo como referencia.",
+    "Corrección al mapa actual: (1) 'Av. Argentina' del informe es una calle de LIMA (Perú), no el país Argentina. (2) Argentina (Alicorp Argentina S.C.A.) y Brasil (Pastificio Santa Amália) fueron VENDIDAS en dic-2021. (3) Bolivia (Industrias de Aceite/marca Fino) se adquirió en 2018 y el negocio de Molienda se VENDIÓ en 2024. (4) Brasil era de pastas/consumo, NO de acuicultura. (5) Faltan en el mapa: Estados Unidos, España y Uruguay.",
+    "Timeline: 'X' indica que la entidad se identifica en las notas de ese informe; su ausencia no prueba inexistencia (puede estar consolidada bajo otra sociedad, p. ej. Alicorp Inversiones S.A.).",
+    "Contexto del GRUPO (consolidado) al 31-dic-2025, informado en Nota 1 del informe separado 2025: Total activo S/10,668,796 mil; Ventas S/11,763,822 mil; Utilidad neta S/459,239 mil."
+  ]
+}
