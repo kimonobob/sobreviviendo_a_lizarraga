@@ -1,0 +1,108 @@
+{
+  "title": {
+    "text": {
+      "headline": "Evolución Operativa y Financiera",
+      "text": "<p>Alicorp S.A.A. — EEFF Separados 2010–2025. Evolución de operaciones, países, líneas de negocio y métricas clave del grupo.</p>"
+    }
+  },
+  "events": [
+    {
+      "start_date": { "year": 2010 },
+      "text": {
+        "headline": "2010 — Panorama Inicial",
+        "text": "<p><strong>Países:</strong> 🇵🇪 Perú (matriz) · 🇪🇨 Ecuador · 🇨🇴 Colombia · 🇦🇷 Argentina · 🇭🇳 Honduras</p><p><strong>Líneas:</strong> Consumo masivo (aceites, pastas, confitería) · B2B/industrial</p><p><strong>Activo total:</strong> S/ 2,478 mil (separado)</p><p><strong>Operación como holding:</strong> la matriz concentra inversiones en subsidiarias bajo método de costo.</p>"
+      },
+      "media": { "url": "/timeline/fundacion.svg", "caption": "Estructura operativa 2010", "credit": "EEFF Separados" }
+    },
+    {
+      "start_date": { "year": 2012 },
+      "text": {
+        "headline": "2012 — Expansión Chile y Cambio Contable",
+        "text": "<p><strong>Nuevo país:</strong> 🇨🇱 Chile — adquisición de Grupo Salmofood (acuicultura/nutrición para salmón)</p><p><strong>Nuevo país:</strong> 🇪🇸 España — Holdco España S.L. (holding de inversiones)</p><p><strong>Nuevo país:</strong> 🇧🇷 Brasil — Pastificio Santa Amália (pastas)</p><p><strong>Cambio contable:</strong> inversiones cambian de costo a participación. Rompe comparabilidad del patrimonio y ROE vs. 2011.</p><p><strong>Utilidad neta:</strong> S/ 315,613 mil</p>"
+      },
+      "media": { "url": "/timeline/expansion.svg", "caption": "Adquisiciones Chile, Brasil, España", "credit": "EEFF Separados 2013" }
+    },
+    {
+      "start_date": { "year": 2014 },
+      "text": {
+        "headline": "2014 — Caída por Derivados",
+        "text": "<p><strong>Utilidad neta:</strong> S/ 10,421 mil — mínima del periodo</p><p><strong>Causa:</strong> pérdidas por instrumentos financieros derivados de materias primas</p><p><strong>Países activos:</strong> 🇵🇪 🇪🇨 🇨🇴 🇦🇷 🇨🇱 🇧🇷 🇭🇳</p><p><strong>Portafolio:</strong> aceites, pastas, confitería, chocolates, harinas, acuicultura (Vitapro en formación)</p>"
+      },
+      "media": { "url": "/timeline/innovacion.svg", "caption": "Impacto de derivados de commodities", "credit": "EEFF Separados" }
+    },
+    {
+      "start_date": { "year": 2015 },
+      "text": {
+        "headline": "2015 — Vitapro y Global Alimentos",
+        "text": "<p><strong>Nuevas entidades:</strong> Vitapro S.A. (acuicultura) · Global Alimentos S.A.C. (cereales)</p><p><strong>Líneas de negocio:</strong> consumo masivo · B2B/industrial · acuicultura (nutrición animal)</p><p><strong>Utilidad neta:</strong> S/ 153,588 mil — recuperación parcial</p><p><strong>Exportaciones a:</strong> Bolivia, Chile, Ecuador, Haití, Colombia, Reino Unido</p>"
+      },
+      "media": { "url": "/timeline/expansion.svg", "caption": "Creación de Vitapro y Global Alimentos", "credit": "EEFF Separados 2015" }
+    },
+    {
+      "start_date": { "year": 2017 },
+      "text": {
+        "headline": "2017 — Crecimiento Sostenido",
+        "text": "<p><strong>Utilidad neta:</strong> S/ 453,095 mil — máximo hasta entonces</p><p><strong>Utilidad operativa:</strong> S/ 479,802 mil</p><p><strong>Presencia:</strong> 🇵🇪 🇪🇨 🇨🇴 🇦🇷 🇨🇱 🇧🇷 🇭🇳 + holding en 🇪🇸</p><p><strong>Acuicultura consolidada:</strong> Vitapro Chile, Vitapro Ecuador en operación</p>"
+      },
+      "media": { "url": "/timeline/sustentabilidad.svg", "caption": "Utilidad neta S/ 453M — máximo histórico", "credit": "EEFF Separados 2017" }
+    },
+    {
+      "start_date": { "year": 2018 },
+      "text": {
+        "headline": "2018 — NIIF 16 y Bolivia",
+        "text": "<p><strong>Nuevo país:</strong> 🇧🇴 Bolivia — adquisición de Industrias de Aceite S.A. (marca Fino, molienda/aceites)</p><p><strong>Cambio contable:</strong> NIIF 16 incrementa pasivos financieros por arrendamientos. No comparable con años anteriores en Deuda/Patrimonio y cobertura de intereses.</p><p><strong>Nueva entidad:</strong> Intradevco Industrial S.A. (cuidado del hogar — Sapolio)</p>"
+      },
+      "media": { "url": "/timeline/adquisicion.svg", "caption": "NIIF 16 + expansión Bolivia", "credit": "EEFF Separados 2019" }
+    },
+    {
+      "start_date": { "year": 2019 },
+      "text": {
+        "headline": "2019 — 8 Países y Uruguay",
+        "text": "<p><strong>Países con operación:</strong> 🇵🇪 🇪🇨 🇨🇴 🇦🇷 🇨🇱 🇧🇷 🇧🇴 🇭🇳 + 🇺🇾 Uruguay (holding/molienda) + 🇪🇸 España</p><p><strong>Activo total:</strong> S/ 4,397 mil (separado)</p><p><strong>Utilidad neta:</strong> S/ 476,228 mil — nuevo máximo</p><p><strong>Marcas clave:</strong> Primor, Bolívar, Don Vittorio, Blanca Flor, Sapolio, Fino</p>"
+      },
+      "media": { "url": "/timeline/expansion.svg", "caption": "Máximo geographical footprint", "credit": "EEFF Separados 2019" }
+    },
+    {
+      "start_date": { "year": 2021 },
+      "text": {
+        "headline": "2021 — Desinversiones y Pérdida",
+        "text": "<p><strong>Venta Argentina:</strong> Alicorp Argentina S.C.A. — 3 dic 2021</p><p><strong>Venta Brasil:</strong> Pastificio Santa Amália — 2021</p><p><strong>Resultado:</strong> Única pérdida neta del periodo: S/ -33,990 mil (participación negativa en subsidiarias)</p><p><strong>Países restantes:</strong> 🇵🇪 🇪🇨 🇨🇴 🇨🇱 🇧🇴 🇭🇳 🇺🇾 + 🇪🇸</p>"
+      },
+      "media": { "url": "/timeline/innovacion.svg", "caption": "Salida de Argentina y Brasil", "credit": "EEFF Separados 2021" }
+    },
+    {
+      "start_date": { "year": 2023 },
+      "text": {
+        "headline": "2023 — Reacomodo y USA",
+        "text": "<p><strong>Nuevo país:</strong> 🇺🇸 Estados Unidos — Alicorp USA LLC (trading/comercialización)</p><p><strong>Utilidad neta:</strong> S/ 188,369 mil — afectada por operaciones discontinuadas</p><p><strong>Consolidado grupo:</strong> Activo total S/ 10,669M · Ventas S/ 11,764M · Utilidad neta S/ 459M</p><p><strong>Entidades activas:</strong> 20+ subsidiarias y asociadas en 9 países</p>"
+      },
+      "media": { "url": "/timeline/expansion.svg", "caption": "Ingreso a Estados Unidos", "credit": "EEFF Separados 2023" }
+    },
+    {
+      "start_date": { "year": 2024 },
+      "end_date": { "year": 2025 },
+      "text": {
+        "headline": "2024-2025 — Reducción de Capital y Molienda",
+        "text": "<p><strong>Venta molienda:</strong> Negocio de molienda en Bolivia y Uruguay vendido en 2024</p><p><strong>Reducción de capital:</strong> 847,192 → 686,226 → 569,573 (miles S/). Eleva artificialmente ROE y apalancamiento.</p><p><strong>Utilidad neta 2025:</strong> S/ 446,334 mil</p><p><strong>Utilidad operativa 2025:</strong> S/ 671,345 mil — récord del periodo</p><p><strong>Países finales:</strong> 🇵🇪 🇪🇨 🇨🇴 🇨🇱 🇭🇳 🇺🇾 🇺🇸 + 🇪🇸 (holding)</p>"
+      },
+      "media": { "url": "/timeline/sustentabilidad.svg", "caption": "Utilidad operativa récord S/ 671M", "credit": "EEFF Separados 2025" }
+    }
+  ],
+  "eras": [
+    {
+      "start_date": { "year": 2010 },
+      "end_date": { "year": 2014 },
+      "text": { "headline": "Consolidación y Derivados (2010-2014)" }
+    },
+    {
+      "start_date": { "year": 2015 },
+      "end_date": { "year": 2019 },
+      "text": { "headline": "Expansión Regional (2015-2019)" }
+    },
+    {
+      "start_date": { "year": 2020 },
+      "end_date": { "year": 2025 },
+      "text": { "headline": "Reestructuración y Crecimiento (2020-2025)" }
+    }
+  ]
+}

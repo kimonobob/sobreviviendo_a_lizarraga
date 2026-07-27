@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#1b4332"/>
+  <rect x="50" y="50" width="700" height="400" rx="20" fill="#2d6a4f"/>
+  <text x="400" y="200" text-anchor="middle" font-family="system-ui" font-size="48" font-weight="bold" fill="#52b788">BMV</text>
+  <text x="400" y="260" text-anchor="middle" font-family="system-ui" font-size="24" fill="#ffffff">Bolsa de Valores de Lima</text>
+  <text x="400" y="320" text-anchor="middle" font-family="system-ui" font-size="18" fill="#888">IPO &amp; Listado</text>
+  <polygon points="400,350 420,390 380,390" fill="#52b788" opacity="0.5"/>
+</svg>

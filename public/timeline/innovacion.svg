@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#023e8a"/>
+  <rect x="50" y="50" width="700" height="400" rx="20" fill="#0077b6"/>
+  <text x="400" y="200" text-anchor="middle" font-family="system-ui" font-size="48" font-weight="bold" fill="#90e0ef">INNOVACIÓN</text>
+  <text x="400" y="260" text-anchor="middle" font-family="system-ui" font-size="24" fill="#ffffff">Nuevos Productos</text>
+  <text x="400" y="320" text-anchor="middle" font-family="system-ui" font-size="18" fill="#888">I+D y Tecnología</text>
+  <rect x="370" y="350" width="60" height="60" rx="10" fill="#90e0ef" opacity="0.3" transform="rotate(45 400 380)"/>
+</svg>
