@@ -7,6 +7,9 @@
 //   detail        → viñetas del modo presentación (versión larga)
 //   note          → lectura contable/financiera del año
 //   images        → archivos en public/timeline/logos (ver README de esa carpeta)
+//
+// Para mover o redimensionar las imágenes de la presentación a mano,
+// ver el bloque "AJUSTE MANUAL DE LAS IMÁGENES" justo encima de EVENTS.
 
 export const LOGO_DIR = "timeline/logos/";
 
@@ -76,10 +79,48 @@ export const FIN_BY_YEAR = {
   2025: { ingresos: 6407059, operativa: 671345, neta: 446334 },
 };
 
+/* ══════════════════════════════════════════════════════════════════
+   AJUSTE MANUAL DE LAS IMÁGENES EN LA PRESENTACIÓN
+   ══════════════════════════════════════════════════════════════════
+   Por defecto las marcas se apilan una por fila y se reparten el alto
+   disponible. Cuando un año no queda bien así, se corrige aquí mismo —
+   no hace falta tocar el CSS. Todos los campos son opcionales.
+
+   ── Por año (junto a `year`, `title`…) ──────────────────────────────
+     imgHeight: 320   Alto del bloque de marcas, en píxeles.
+                      Súbelo para que se vean más grandes, bájalo si
+                      empujan las cifras hacia abajo.
+     imgCols: 2       En cuántas columnas se reparten. 1 = apiladas.
+                      Dos columnas encogen los logotipos apaisados,
+                      así que conviene sobre todo con los cuadrados.
+
+   ── Por imagen (dentro de `images`) ─────────────────────────────────
+     scale: 1.25      Tamaño respecto al que le tocaría. 1 = sin tocar,
+                      0.8 = 20% más chico, 1.25 = 25% más grande.
+     x: -14           La mueve en horizontal, en píxeles. Negativo = izquierda.
+     y: 8             La mueve en vertical, en píxeles. Negativo = arriba.
+
+   Ejemplo — un año con dos marcas, la segunda algo más grande y subida:
+
+     {
+       year: 2012,
+       …
+       imgHeight: 340,
+       images: [
+         { src: "salmofood.png", label: "Salmofood" },
+         { src: "vitapro.png", label: "Vitapro", scale: 1.2, y: -8 },
+       ],
+     }
+
+   Ojo con `scale` por encima de 1: la imagen se sale de su casilla y
+   puede pisar a la vecina. Es a propósito — el control es tuyo —, pero
+   si dos se tocan, ese suele ser el motivo.
+   ══════════════════════════════════════════════════════════════════ */
+
 /** Hitos en orden cronológico. */
 export const EVENTS = [
   {
-    year: 1956,
+    year: 1956, imgHeight: 460,
     title: "Constitución como Anderson Clayton & Company",
     text: "Se constituye la compañía en el Callao, dedicada a la fabricación de aceites y jabones.",
     detail: [
@@ -143,9 +184,9 @@ export const EVENTS = [
     countries: ["Perú"],
     tags: ["Nicolini Hermanos", "Molinera del Perú"],
     images: [
-      { src: "cfp.png", label: "Consorcio Fabril Pacífico" },
-      { src: "nicolini.png", label: "Nicolini Hermanos" },
-      { src: "molinera-del-peru.png", label: "Molinera del Perú" },
+      { src: "cfp.png", label: "Consorcio Fabril Pacífico",y: -340,scale: 0.5 },
+      { src: "nicolini.png", label: "Nicolini Hermanos",y: -190,scale: 0.5 },
+      { src: "molinera-del-peru.png", label: "Molinera del Perú",y: -0,scale: 0.5 },
     ],
   },
   {
@@ -161,7 +202,7 @@ export const EVENTS = [
     flags: ["🇵🇪"],
     countries: ["Perú"],
     tags: ["Alicorp", "S.A.A."],
-    images: [{ src: "alicorp.png", label: "Alicorp S.A.A." }],
+    images: [{ src: "alicorp.png", label: "Alicorp S.A.A.",scale: 1.2 }],
     note: "Desde aquí el accionariado es abierto: la empresa queda sujeta a reporte ante la SMV.",
   },
   {
@@ -177,10 +218,7 @@ export const EVENTS = [
     flags: ["🇵🇪"],
     countries: ["Perú"],
     tags: ["Alimentum", "Lamborghini"],
-    images: [
-      { src: "alimentum.png", label: "Alimentum" },
-      { src: "lamborghini.png", label: "Helados Lamborghini" },
-    ],
+    images: [{ src: "lamborghini.png", label: "Helados Lamborghini",y: -120 }],
   },
   {
     year: 2005,
@@ -195,7 +233,7 @@ export const EVENTS = [
     flags: ["🇪🇨", "🇨🇴", "🇧🇷", "🇨🇱", "🇦🇷"],
     countries: ["Ecuador", "Colombia", "Brasil", "Chile", "Argentina"],
     tags: ["Consumo masivo"],
-    images: [{ src: "expansion-regional.png", label: "Expansión regional" }],
+    images: [{ src: "expansion-regional.png", label: "Expansión regional",y: -170 }],
   },
   {
     year: 2008,
@@ -212,8 +250,8 @@ export const EVENTS = [
     countries: ["Argentina", "Uruguay", "Colombia", "Perú"],
     tags: ["The Value Brands", "Propersa"],
     images: [
-      { src: "the-value-brands.png", label: "The Value Brands Co." },
-      { src: "propersa.png", label: "Propersa" },
+      { src: "the-value-brands.png", label: "The Value Brands Co.",y: -220 },
+      { src: "propersa.png", label: "Propersa",y: -120 },
     ],
   },
   {
@@ -229,10 +267,7 @@ export const EVENTS = [
     flags: ["🇪🇨", "🇦🇷"],
     countries: ["Ecuador", "Argentina"],
     tags: ["Heladosa", "Sanford"],
-    images: [
-      { src: "heladosa.png", label: "Heladosa" },
-      { src: "sanford.png", label: "Sanford" },
-    ],
+    images: [{ src: "heladosa.png", label: "Heladosa",y: -300,scale:0.6 }],
     note: "Base separada 2010: la matriz opera como holding y mide sus inversiones por método de costo.",
   },
   {
@@ -250,10 +285,9 @@ export const EVENTS = [
     countries: ["España", "Chile"],
     tags: ["Salmofood", "Vitapro", "Okebón"],
     images: [
-      { src: "salmofood.png", label: "Salmofood" },
-      { src: "vitapro.png", label: "Vitapro" },
-      { src: "holdco-espana.png", label: "Holdco España" },
-      { src: "okebon.png", label: "Okebón" },
+      { src: "salmofood.png", label: "Salmofood",y: -300 },
+      { src: "vitapro.png", label: "Vitapro",y: -200 },
+      { src: "okebon.png", label: "Okebón",y: -290,scale:0.7 },
     ],
     note: "Las inversiones pasan de método de costo a participación: rompe la comparabilidad del patrimonio y del ROE frente a 2011.",
   },
@@ -271,8 +305,8 @@ export const EVENTS = [
     countries: ["Brasil", "Perú"],
     tags: ["Santa Amália", "Sayón"],
     images: [
-      { src: "santa-amalia.png", label: "Santa Amália" },
-      { src: "sayon.png", label: "Sayón" },
+      { src: "santa-amalia.png", label: "Santa Amália",y: -300,scale:0.7 },
+      { src: "sayon.png", label: "Sayón",y: -150,scale:0.5 },
     ],
   },
   {
@@ -288,11 +322,7 @@ export const EVENTS = [
     flags: ["🇵🇪"],
     countries: ["Perú"],
     tags: ["Global Alimentos", "Ángel", "Saracolca"],
-    images: [
-      { src: "global-alimentos.png", label: "Global Alimentos" },
-      { src: "angel.png", label: "Ángel" },
-      { src: "molino-saracolca.png", label: "Molino Saracolca" },
-    ],
+    images: [{ src: "global-alimentos.png", label: "Global Alimentos",y: -250,scale:0.8 }],
     note: "Año de utilidad neta mínima del periodo por pérdidas en derivados de materias primas.",
   },
   {
@@ -309,10 +339,10 @@ export const EVENTS = [
     countries: ["Honduras"],
     tags: ["Vitapro Honduras", "Primor", "Blanca Flor", "Don Vittorio"],
     images: [
-      { src: "vitapro-honduras.png", label: "Vitapro Honduras" },
-      { src: "primor.png", label: "Primor" },
-      { src: "blanca-flor.png", label: "Blanca Flor" },
-      { src: "don-vittorio.png", label: "Don Vittorio" },
+      { src: "vitapro-honduras.png", label: "Vitapro Honduras",y: -250,scale:0.5,x:-150 },
+      { src: "primor.png", label: "Primor",y: -350,scale:0.5,x:+150 },
+      { src: "blanca-flor.png", label: "Blanca Flor",y: -220,scale:0.5,x:+150 },
+      { src: "don-vittorio.png", label: "Don Vittorio",y: -210,scale:0.5,x:+150 },
     ],
   },
   {
@@ -329,8 +359,8 @@ export const EVENTS = [
     countries: ["Bolivia"],
     tags: ["Industrias de Aceite", "Fino", "SAO"],
     images: [
-      { src: "industrias-de-aceite.png", label: "Industrias de Aceite" },
-      { src: "fino.png", label: "Fino" },
+      { src: "industrias-de-aceite.png", label: "Industrias de Aceite",y: -150,scale:1 },
+      { src: "fino.png", label: "Fino",y: -320,scale:0.6 },
     ],
     note: "La NIIF 16 empieza a elevar los pasivos por arrendamientos: Deuda/Patrimonio no es comparable con años previos.",
   },
@@ -348,8 +378,8 @@ export const EVENTS = [
     countries: ["Perú"],
     tags: ["Intradevco", "Sapolio"],
     images: [
-      { src: "intradevco.png", label: "Intradevco Industrial" },
-      { src: "sapolio.png", label: "Sapolio" },
+      { src: "intradevco.png", label: "Intradevco Industrial",y: -320,scale:0.8 },
+      { src: "sapolio.png", label: "Sapolio",y: -140,scale:0.8 },
     ],
     note: "Máxima huella geográfica del periodo y utilidad neta récord hasta ese momento.",
   },
@@ -367,12 +397,11 @@ export const EVENTS = [
     countries: ["Bolivia", "Perú"],
     tags: ["ADM", "Sao", "Ideal", "Mirasol", "Bolívar", "Opal"],
     images: [
-      { src: "adm.png", label: "Marcas ADM" },
-      { src: "sao.png", label: "SAO" },
-      { src: "ideal.png", label: "Ideal" },
+      { src: "sao.png", label: "SAO",y: -110,x:-10 },
+      { src: "ideal.png", label: "Ideal",y: -110,scale:0.85,x:-150 },
       { src: "mirasol.png", label: "Mirasol" },
-      { src: "bolivar.png", label: "Bolívar" },
-      { src: "opal.png", label: "Opal" },
+      { src: "bolivar.png", label: "Bolívar",y: -240,scale:1.2,x:+30 },
+      { src: "opal.png", label: "Opal",y: -5,scale:1,x:+320 },
     ],
   },
   {
@@ -389,8 +418,8 @@ export const EVENTS = [
     countries: ["Argentina", "Brasil"],
     tags: ["Alicorp Argentina", "Santa Amália"],
     images: [
-      { src: "alicorp-argentina.png", label: "Alicorp Argentina" },
-      { src: "santa-amalia.png", label: "Santa Amália" },
+      { src: "alicorp-argentina.png", label: "Alicorp Argentina",y: -310,scale:0.5 },
+      { src: "santa-amalia.png", label: "Santa Amália",y: -250,scale:0.5 },
     ],
     note: "Única pérdida neta del periodo, por participación negativa en subsidiarias.",
   },
@@ -406,7 +435,7 @@ export const EVENTS = [
     flags: ["🇵🇪"],
     countries: ["Perú"],
     tags: ["Vegetalia"],
-    images: [{ src: "vegetalia.png", label: "Vegetalia" }],
+    images: [{ src: "vegetalia.png", label: "Vegetalia",y:-100 }],
   },
   {
     year: 2023,
@@ -437,7 +466,7 @@ export const EVENTS = [
     flags: ["🇵🇪"],
     countries: ["Perú"],
     tags: ["Refinería del Espino"],
-    images: [{ src: "refineria-del-espino.png", label: "Refinería del Espino" }],
+    images: [{ src: "refineria-del-espino.png", label: "Refinería del Espino",y:-250 }],
     note: "El capital emitido baja de 847,192 a 686,226 (miles S/): eleva artificialmente el ROE y el apalancamiento.",
   },
   {
@@ -454,9 +483,9 @@ export const EVENTS = [
     countries: ["Ecuador", "Perú"],
     tags: ["Jabonería Wilson", "Disanu", "Sanuss"],
     images: [
-      { src: "jaboneria-wilson.png", label: "Jabonería Wilson" },
-      { src: "disanu.png", label: "Disanu" },
-      { src: "sanuss.png", label: "Sanuss" },
+      { src: "jaboneria-wilson.png", label: "Jabonería Wilson",y:-340,scale:0.7 },
+      { src: "disanu.png", label: "Disanu",y:-120,scale:0.7 },
+      { src: "sanuss.png", label: "Sanuss",y:-320,scale:0.7 },
     ],
     note: "Nueva reducción de capital a 569,573 (miles S/) y utilidad operativa alta del periodo reciente.",
   },

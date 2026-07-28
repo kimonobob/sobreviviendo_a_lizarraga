@@ -197,9 +197,14 @@ function TimelineModal({ open, onClose }) {
           </div>
         </header>
 
+        {/* En modo ajustado la imagen ocupa toda la caja y `object-contain`
+            la encoge hasta caber entera. Con `max-h-full` no bastaba: el
+            contenedor tiene altura automática y el máximo no llegaba a
+            aplicarse, así que la lámina se pintaba a tamaño natural y se
+            recortaba. */}
         <div
           ref={scrollRef}
-          className={`min-h-0 flex-1 bg-plane ${zoom ? "overflow-auto" : "grid place-items-center overflow-hidden p-3"}`}
+          className={`min-h-0 flex-1 bg-plane ${zoom ? "overflow-auto" : "overflow-hidden p-3"}`}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={endDrag}
@@ -214,7 +219,7 @@ function TimelineModal({ open, onClose }) {
               className={
                 zoom
                   ? "max-w-none select-none cursor-grab active:cursor-grabbing"
-                  : "max-h-full max-w-full select-none object-contain cursor-zoom-in"
+                  : "h-full w-full select-none object-contain cursor-zoom-in"
               }
             />
           )}

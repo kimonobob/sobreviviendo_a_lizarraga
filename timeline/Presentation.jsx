@@ -18,6 +18,10 @@ import "./slides.css";
 const TOTAL = EVENTS.length + 1;
 const OVERVIEW = EVENTS.length;
 
+/** Cuánto dura el cruce entre láminas. Debe coincidir con slStageOut/slBgOut
+ *  en slides.css: si lo cambias aquí, cámbialo también allí. */
+const CROSSFADE_MS = 560;
+
 /** Retardo de entrada, en milisegundos, como variable CSS. */
 const at = (ms) => ({ "--d": `${ms}ms` });
 
@@ -118,9 +122,27 @@ function EventSlide({ ev }) {
 
         <aside className="sl-side">
           {ev.images?.length > 0 && (
-            <div className="sl-logos">
+            /* El número de marcas fija el reparto por defecto; imgHeight
+               e imgCols del hito lo pisan cuando un año necesita otra cosa. */
+            <div
+              className="sl-logos"
+              data-count={Math.min(ev.images.length, 6)}
+              style={{
+                ...(ev.imgHeight ? { "--sl-logos-h": `${ev.imgHeight}px` } : null),
+                ...(ev.imgCols ? { "--sl-logos-cols": String(ev.imgCols) } : null),
+              }}
+            >
               {ev.images.map((img, k) => (
-                <div key={img.src} className="sl-logo sl-fx-pop" style={at(300 + k * 80)}>
+                <div
+                  key={img.src}
+                  className="sl-logo sl-fx-pop"
+                  style={{
+                    ...at(300 + k * 80),
+                    ...(img.scale ? { "--img-scale": String(img.scale) } : null),
+                    ...(img.x ? { "--img-x": `${img.x}px` } : null),
+                    ...(img.y ? { "--img-y": `${img.y}px` } : null),
+                  }}
+                >
                   <LogoImg src={img.src} label={img.label} />
                 </div>
               ))}
@@ -238,8 +260,23 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
   // +1 avanzando, -1 retrocediendo: define hacia dónde entra el contenido.
   const [dir, setDir] = useState(1);
 
+  // Lámina que se está yendo: se mantiene montada mientras dura el cruce,
+  // para que una se disuelva sobre la otra en vez de cortar en seco.
+  const [leaving, setLeaving] = useState(null);
+  const shownRef = useRef(i);
+
   const ev = i < OVERVIEW ? EVENTS[i] : null;
   const accent = ev ? categoryColor(ev.category) : "var(--brand)";
+
+  const leavingEv = leaving != null && leaving < OVERVIEW ? EVENTS[leaving] : null;
+
+  useEffect(() => {
+    if (shownRef.current === i) return;
+    setLeaving(shownRef.current);
+    shownRef.current = i;
+    const t = setTimeout(() => setLeaving(null), CROSSFADE_MS);
+    return () => clearTimeout(t);
+  }, [i]);
 
   /** Salta a una lámina concreta, deduciendo la dirección de la animación. */
   const goTo = useCallback((target) => {
@@ -324,17 +361,23 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
       aria-modal="true"
       aria-label="Presentación de la línea de tiempo de Alicorp"
     >
-      {ev && (
-        <>
-          <div
-            key={`bg-${ev.year}`}
-            className="sl-bg"
-            style={{ backgroundImage: `url("${bgUrl(ev.year)}")` }}
-            aria-hidden
-          />
-          <div className="sl-scrim" aria-hidden />
-        </>
+      {leavingEv && (
+        <div
+          key={`bg-out-${leavingEv.year}`}
+          className="sl-bg sl-bg-out"
+          style={{ backgroundImage: `url("${bgUrl(leavingEv.year)}")` }}
+          aria-hidden
+        />
       )}
+      {ev && (
+        <div
+          key={`bg-${ev.year}`}
+          className="sl-bg"
+          style={{ backgroundImage: `url("${bgUrl(ev.year)}")` }}
+          aria-hidden
+        />
+      )}
+      {(ev || leavingEv) && <div className="sl-scrim" aria-hidden />}
 
       <div className="sl-bar">
         <span className="sl-brand">
@@ -363,8 +406,23 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
         </span>
       </div>
 
-      <div className="sl-stage" data-overview={!ev} key={i}>
-        {ev ? <EventSlide ev={ev} /> : <OverviewSlide onPick={goTo} />}
+      <div className="sl-deck">
+        {leaving != null && (
+          <div
+            key={`out-${leaving}`}
+            className="sl-stage sl-stage-out"
+            data-overview={!leavingEv}
+            style={{
+              "--sl-cat": leavingEv ? categoryColor(leavingEv.category) : "var(--brand)",
+            }}
+            aria-hidden
+          >
+            {leavingEv ? <EventSlide ev={leavingEv} /> : <OverviewSlide onPick={() => {}} />}
+          </div>
+        )}
+        <div className="sl-stage" data-overview={!ev} key={i}>
+          {ev ? <EventSlide ev={ev} /> : <OverviewSlide onPick={goTo} />}
+        </div>
       </div>
 
       <button

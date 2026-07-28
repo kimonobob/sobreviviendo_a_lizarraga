@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { soles } from "../src/lib/format";
-import { LogoImg } from "./LogoImg";
+import { EventPanel } from "./EventPanel";
+import { MiniCard } from "./MiniCard";
 import { Presentation } from "./Presentation";
+import { useTimelineRail } from "./useTimelineRail";
 import {
   CATEGORIES,
   ERAS,
@@ -17,96 +17,42 @@ import "./time.css";
 const FIRST_YEAR = EVENTS[0].year;
 const LAST_YEAR = EVENTS[EVENTS.length - 1].year;
 
-/** Cifras del EEFF separado del año, si existen (solo 2010–2025). */
-function FinStrip({ year }) {
+/** Cuánto dura el relevo entre panels. Debe coincidir con tlPanelOut
+ *  en time.css: si lo cambias aquí, cámbialo también allí. */
+const PANEL_CROSS_MS = 360;
+
+/* ── Grosor del eje ────────────────────────────────────────────────
+   El eje de la línea es también un gráfico: su grosor en cada tramo es
+   la escala de ingresos de ese año, así que la línea se engrosa de
+   izquierda a derecha conforme Alicorp crece. Los hitos anteriores a
+   2010 no tienen EEFF separados publicados y se dibujan con trazo
+   punteado — no se inventa un grosor donde no hay dato. */
+const REVENUES = Object.values(FIN_BY_YEAR).map((f) => f.ingresos);
+const REV_MIN = Math.min(...REVENUES);
+const REV_MAX = Math.max(...REVENUES);
+const AXIS_MIN_PX = 4;
+const AXIS_MAX_PX = 19;
+
+function axisWidth(year) {
   const fin = FIN_BY_YEAR[year];
   if (!fin) return null;
-  return (
-    <div className="tl-fin">
-      <div className="tl-fin-item">
-        <span className="tl-fin-k">Ingresos</span>
-        <span className="tl-fin-v">{soles(fin.ingresos)}</span>
-      </div>
-      <div className="tl-fin-item">
-        <span className="tl-fin-k">U. operativa</span>
-        <span className="tl-fin-v">{soles(fin.operativa)}</span>
-      </div>
-      <div className="tl-fin-item">
-        <span className="tl-fin-k">U. neta</span>
-        <span className="tl-fin-v" data-neg={fin.neta < 0}>
-          {soles(fin.neta)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/** Medidas de la tarjeta ampliada, para poder encajarla en pantalla. */
-const PREVIEW_W = 420;
-const PREVIEW_H = 600;
-
-/**
- * Tarjeta ampliada que aparece al pasar el cursor por un año.
- * Va montada en el <body> porque el carril recorta verticalmente y
- * el contenedor del rail tiene un transform de animación.
- */
-function Preview({ ev, x, y }) {
-  const cat = categoryById(ev.category);
-  return createPortal(
-    <div
-      className="tl-preview"
-      style={{ left: `${x}px`, top: `${y}px`, "--tl-cat": categoryColor(ev.category) }}
-      aria-hidden
-    >
-      {ev.images?.length > 0 && (
-        <div className="tl-pv-logos" data-count={Math.min(ev.images.length, 4)}>
-          {ev.images.slice(0, 4).map((img) => (
-            <span key={img.src} className="tl-pv-logo">
-              <LogoImg src={img.src} label={img.label} />
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="tl-pv-head">
-        <span className="tl-pv-year">{ev.year}</span>
-        <span className="tl-pv-cat">{cat.label}</span>
-        <span className="tl-pv-flags">{ev.flags.join(" ")}</span>
-      </div>
-
-      <h3 className="tl-pv-title">{ev.title}</h3>
-      <p className="tl-pv-text">{ev.text}</p>
-
-      {ev.tags?.length > 0 && (
-        <div className="tl-pv-tags">
-          {ev.tags.map((t) => (
-            <span key={t} className="tl-pv-tag">
-              {t}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <FinStrip year={ev.year} />
-      {ev.note && <p className="tl-pv-note">{ev.note}</p>}
-    </div>,
-    document.body
-  );
+  const t = (fin.ingresos - REV_MIN) / (REV_MAX - REV_MIN);
+  return `${(AXIS_MIN_PX + t * (AXIS_MAX_PX - AXIS_MIN_PX)).toFixed(1)}px`;
 }
 
 export function Timeline() {
-  const itemRefs = useRef(new Map());
-  const hoverTimer = useRef(null);
-
   const [hidden, setHidden] = useState([]);
-  const [selYear, setSelYear] = useState(FIRST_YEAR);
   const [presenting, setPresenting] = useState(false);
-  const [preview, setPreview] = useState(null);
 
   const visible = useMemo(
     () => EVENTS.filter((e) => !hidden.includes(e.category)),
     [hidden]
   );
+
+  const years = useMemo(() => visible.map((e) => e.year), [visible]);
+
+  const { railRef, trackRef, viewportRef, itemRef, centerYear, centerOn, stepBy } =
+    useTimelineRail(years);
 
   const counts = useMemo(() => {
     const m = {};
@@ -114,103 +60,91 @@ export function Timeline() {
     return m;
   }, []);
 
-  const selIndex = visible.findIndex((e) => e.year === selYear);
-  const activeEra = eraOf(selYear);
+  const selIndex = years.indexOf(centerYear);
+  const activeEra = eraOf(centerYear);
+  const activeEv = EVENTS.find((e) => e.year === centerYear) ?? EVENTS[0];
 
-  const focus = useCallback((year, { scroll = true } = {}) => {
-    setSelYear(year);
-    if (!scroll) return;
-    const el = itemRefs.current.get(year);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, []);
+  /* ── Relevo del panel ──────────────────────────────────────────────
+     Al cambiar de año el panel saliente se queda montado mientras dura
+     el cruce, para que uno se disuelva sobre el otro en vez de cortar
+     en seco. Los dos comparten casilla de rejilla: el que entra ocupa
+     exactamente el sitio del que se va. */
+  const [leavingYear, setLeavingYear] = useState(null);
+  const shownRef = useRef(centerYear);
+  const [dir, setDir] = useState(1);
 
-  const step = useCallback(
-    (delta) => {
-      if (visible.length === 0) return;
-      const from = selIndex === -1 ? 0 : selIndex + delta;
-      const next = Math.min(visible.length - 1, Math.max(0, from));
-      focus(visible[next].year);
+  useEffect(() => {
+    if (shownRef.current === centerYear) return;
+    setDir(centerYear > shownRef.current ? 1 : -1);
+    setLeavingYear(shownRef.current);
+    shownRef.current = centerYear;
+    const t = setTimeout(() => setLeavingYear(null), PANEL_CROSS_MS);
+    return () => clearTimeout(t);
+  }, [centerYear]);
+
+  const leavingEv =
+    leavingYear == null ? null : EVENTS.find((e) => e.year === leavingYear);
+
+  const onKeyDown = useCallback(
+    (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        stepBy(1);
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        stepBy(-1);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        if (years[0]) centerOn(years[0]);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        if (years.length) centerOn(years[years.length - 1]);
+      }
     },
-    [focus, selIndex, visible]
+    [centerOn, stepBy, years]
   );
-
-  // Si un filtro esconde el hito seleccionado, salta al más cercano visible.
-  useEffect(() => {
-    if (visible.length === 0) return;
-    if (visible.some((e) => e.year === selYear)) return;
-    const nearest = visible.reduce((best, e) =>
-      Math.abs(e.year - selYear) < Math.abs(best.year - selYear) ? e : best
-    );
-    setSelYear(nearest.year);
-  }, [visible, selYear]);
-
-  const onKeyDown = (e) => {
-    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-      e.preventDefault();
-      step(1);
-    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-      e.preventDefault();
-      step(-1);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      if (visible[0]) focus(visible[0].year);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      if (visible.length) focus(visible[visible.length - 1].year);
-    }
-  };
-
-  /* ── Vista ampliada al pasar el cursor ────────────────────────────── */
-
-  const closePreview = useCallback(() => {
-    clearTimeout(hoverTimer.current);
-    setPreview(null);
-  }, []);
-
-  /** Ancla la tarjeta ampliada sobre el año, sin que se salga de la pantalla. */
-  const openPreview = useCallback((ev, el) => {
-    clearTimeout(hoverTimer.current);
-    hoverTimer.current = setTimeout(() => {
-      const r = el.getBoundingClientRect();
-      const halfW = PREVIEW_W / 2 + 12;
-      const halfH = PREVIEW_H / 2 + 12;
-      setPreview({
-        ev,
-        x: Math.min(Math.max(r.left + r.width / 2, halfW), window.innerWidth - halfW),
-        y: Math.min(Math.max(r.top + r.height / 2, halfH), window.innerHeight - halfH),
-      });
-    }, 120); // pequeña espera: evita parpadeos al barrer el carril
-  }, []);
-
-  useEffect(() => () => clearTimeout(hoverTimer.current), []);
-
-  // El scroll lo hace la página, así que la posición anclada se invalida ahí.
-  useEffect(() => {
-    window.addEventListener("scroll", closePreview, true);
-    return () => window.removeEventListener("scroll", closePreview, true);
-  }, [closePreview]);
-
-  // Si el carril se mueve o se abre la presentación, la posición ya no vale.
-  useEffect(() => {
-    if (presenting) closePreview();
-  }, [presenting, closePreview]);
 
   const toggleCat = (id) =>
     setHidden((h) => (h.includes(id) ? h.filter((x) => x !== id) : [...h, id]));
 
   const goToEra = (era) => {
     const target = visible.find((e) => e.year >= era.from && e.year <= era.to);
-    if (target) focus(target.year);
+    if (target) centerOn(target.year);
   };
+
+  // Al ocultar una categoría el año centrado puede desaparecer: el carril
+  // se recoloca sobre el hito visible más próximo en vez de quedar en el aire.
+  useEffect(() => {
+    if (years.length === 0 || years.includes(centerYear)) return;
+    const nearest = years.reduce((best, y) =>
+      Math.abs(y - centerYear) < Math.abs(best - centerYear) ? y : best
+    );
+    centerOn(nearest);
+  }, [years, centerYear, centerOn]);
 
   return (
     <div className="tl-screen">
+      {/* Fondo. La ruta se pasa desde aquí y no desde el CSS para que
+          respete el BASE_URL del despliegue. Todos los mandos —
+          opacidad, velo, desvanecido — están en time.css. */}
+      <div
+        className="tl-bg"
+        aria-hidden
+        style={{
+          "--tl-bg-src": `url("${import.meta.env.BASE_URL || "/"}timeline/time.png")`,
+        }}
+      />
+
       <div className="tl-head">
         <div>
+          <span className="tl-eyebrow">
+            {FIRST_YEAR}—{LAST_YEAR} · {EVENTS.length} hitos
+          </span>
           <h2 className="tl-title">Evolución de Alicorp S.A.A.</h2>
           <p className="tl-sub">
-            {EVENTS.length} hitos corporativos · {FIRST_YEAR}–{LAST_YEAR} · de Anderson Clayton
-            a la Alicorp de hoy. Las cifras son del EEFF <strong>separado</strong> (S/ millones).
+            De una planta de aceites y jabones en el Callao a un grupo multilatino de consumo
+            masivo, B2B y acuicultura. Las cifras son del EEFF <strong>separado</strong>,
+            en S/ millones.
           </p>
         </div>
         <div className="tl-actions">
@@ -263,104 +197,80 @@ export function Timeline() {
         ))}
       </div>
 
-      <div className="tl-viewport">
+      {/* El carril ocupa el hueco entero, como siempre. El panel no vive
+          en el flujo: flota encima en su propia capa, así que la línea no
+          se desplaza, no crece y no reserva sitio para él. */}
+      <div className="tl-viewport" ref={viewportRef}>
         <button
           type="button"
           className="tl-nav tl-nav-prev"
-          onClick={() => step(-1)}
+          onClick={() => stepBy(-1)}
           disabled={selIndex <= 0}
           aria-label="Hito anterior"
           title="Hito anterior"
         >
-          ↑
+          ←
         </button>
         <button
           type="button"
           className="tl-nav tl-nav-next"
-          onClick={() => step(1)}
-          disabled={selIndex >= visible.length - 1}
+          onClick={() => stepBy(1)}
+          disabled={selIndex >= years.length - 1}
           aria-label="Hito siguiente"
           title="Hito siguiente"
         >
-          ↓
+          →
         </button>
 
         <div
           className="tl-rail"
+          ref={railRef}
           tabIndex={0}
           role="group"
           aria-label="Línea de tiempo de hitos de Alicorp"
           onKeyDown={onKeyDown}
-          onMouseLeave={closePreview}
         >
           {visible.length === 0 ? (
             <p className="tl-empty">
               Ningún hito coincide con los filtros. Vuelve a activar alguna categoría.
             </p>
           ) : (
-            <div className="tl-track" role="list">
+            <div className="tl-track" ref={trackRef} role="list">
+              {/* Recorrido de la línea: se llena conforme avanzas. */}
+              <div className="tl-progress" aria-hidden>
+                <span className="tl-progress-fill" />
+              </div>
+
               {visible.map((ev, i) => {
-                const cat = categoryById(ev.category);
-                const selected = ev.year === selYear;
+                const selected = ev.year === centerYear;
                 return (
                   <div
                     key={ev.year}
                     role="listitem"
-                    ref={(el) => {
-                      if (el) itemRefs.current.set(ev.year, el);
-                      else itemRefs.current.delete(ev.year);
-                    }}
+                    ref={itemRef(ev.year)}
                     className="tl-item"
                     data-side={i % 2 === 0 ? "up" : "down"}
                     data-selected={selected}
-                    data-preview={preview?.ev.year === ev.year}
-                    style={{ "--tl-cat": categoryColor(ev.category), "--i": i }}
+                    data-scale={axisWidth(ev.year) ? "data" : "none"}
+                    style={{
+                      "--tl-cat": categoryColor(ev.category),
+                      "--tl-w": axisWidth(ev.year) ?? undefined,
+                    }}
                   >
+                    {/* Tarjeta de contexto, alternando arriba y abajo. La del
+                        año activo se retira hacia el eje: se convirtió en el
+                        panel grande. */}
                     <div className="tl-cell">
-                      <article
-                        className="tl-card"
-                        onClick={() => focus(ev.year, { scroll: false })}
-                        onMouseEnter={(e) => openPreview(ev, e.currentTarget)}
-                        onMouseLeave={closePreview}
-                      >
-                        <div className="tl-card-top">
-                          <span className="tl-cat">{cat.label}</span>
-                          <span className="tl-flags">{ev.flags.join(" ")}</span>
-                        </div>
-                        <h3 className="tl-card-title">{ev.title}</h3>
-                        {ev.images?.length > 0 && (
-                          <div className="tl-thumbs">
-                            {ev.images.slice(0, 3).map((img) => (
-                              <span key={img.src} className="tl-thumb">
-                                <LogoImg src={img.src} label={img.label} />
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <p className="tl-card-text">{ev.text}</p>
-                        {ev.tags?.length > 0 && (
-                          <div className="tl-tags">
-                            {ev.tags.map((t) => (
-                              <span key={t} className="tl-tag">
-                                {t}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <FinStrip year={ev.year} />
-                        {selected && ev.note && <p className="tl-note">{ev.note}</p>}
-                      </article>
+                      <MiniCard ev={ev} onSelect={() => centerOn(ev.year)} />
                     </div>
 
                     <div className="tl-axis">
                       <button
                         type="button"
                         className="tl-node"
-                        onClick={() => focus(ev.year)}
-                        onMouseEnter={(e) => openPreview(ev, e.currentTarget)}
-                        onMouseLeave={closePreview}
+                        onClick={() => centerOn(ev.year)}
                         aria-current={selected}
-                        title={ev.title}
+                        title={`${ev.year} — ${ev.title}`}
                       >
                         {ev.year}
                       </button>
@@ -371,30 +281,54 @@ export function Timeline() {
             </div>
           )}
         </div>
+
+        {/* Capa flotante del hito activo. Los dos panels que puede haber a
+            la vez —el que entra y el que sale— comparten la misma posición
+            absoluta, así que el nuevo aparece justo donde estaba el otro. */}
+        {visible.length > 0 && (
+          <>
+            {leavingEv && (
+              <EventPanel key={`out-${leavingEv.year}`} ev={leavingEv} state="out" dir={dir} />
+            )}
+            <EventPanel key={activeEv.year} ev={activeEv} state="in" dir={dir} />
+          </>
+        )}
       </div>
 
       <div className="tl-hint">
         <span>
-          Desplázate para recorrer la línea · <span className="tl-kbd">↑</span>{" "}
-          <span className="tl-kbd">↓</span> salta de hito ·{" "}
-          <span className="tl-kbd">Inicio</span> / <span className="tl-kbd">Fin</span> extremos ·
-          pasa el cursor por un año para verlo en grande · <strong>Presentación</strong> para
-          recorrerlo a pantalla completa
+          <strong>El grosor del eje son los ingresos de ese año</strong> — el trazo punteado
+          marca los hitos anteriores a 2010, sin EEFF separados publicados. Cada muesca de
+          rueda avanza un año · <span className="tl-kbd">←</span>{" "}
+          <span className="tl-kbd">→</span> también saltan
         </span>
         <span>
           Mostrando {visible.length} de {EVENTS.length} hitos · era actual: {activeEra.label}
         </span>
       </div>
 
-      {preview && !presenting && (
-        <Preview ev={preview.ev} x={preview.x} y={preview.y} />
-      )}
+      {/* En pantalla manda el panel, que muestra un año cada vez. En papel
+          eso perdería 39 hitos, así que la impresión despliega la lista
+          completa. */}
+      <ol className="tl-print-list">
+        {visible.map((ev) => (
+          <li key={ev.year} style={{ "--tl-cat": categoryColor(ev.category) }}>
+            <span className="tl-print-year">{ev.year}</span>
+            <div>
+              <span className="tl-cat">{categoryById(ev.category).label}</span>
+              <h3>{ev.title}</h3>
+              <p>{ev.text}</p>
+              {ev.note && <p className="tl-print-note">{ev.note}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
 
       {presenting && (
         <Presentation
-          startIndex={Math.max(0, EVENTS.findIndex((e) => e.year === selYear))}
+          startIndex={Math.max(0, EVENTS.findIndex((e) => e.year === centerYear))}
           onClose={() => setPresenting(false)}
-          onExitAt={(year) => focus(year)}
+          onExitAt={(year) => centerOn(year)}
         />
       )}
     </div>

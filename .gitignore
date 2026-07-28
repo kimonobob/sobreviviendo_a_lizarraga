@@ -3,3 +3,6 @@ dist
 *.local
 .DS_Store
 npm-debug.log*
+
+# el gif original del fondo (88 MB), sustituido por time.png
+*.gif

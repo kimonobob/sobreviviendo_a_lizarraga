@@ -114,7 +114,14 @@ export default function App() {
             }`}
             title={isTimeline ? "Volver al dashboard" : "Ver línea de tiempo de Alicorp"}
           >
-            <span aria-hidden>⏳</span>
+            {/* Eje con tramos de ancho creciente: adelanta el gesto de la
+                pantalla, donde el grosor de la línea son los ingresos. */}
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
+              <rect x="0.9" y="1" width="1.6" height="12" rx="0.8" opacity=".45" />
+              <rect x="4" y="2.2" width="5" height="1.7" rx="0.85" opacity=".55" />
+              <rect x="4" y="6.15" width="7.5" height="1.7" rx="0.85" opacity=".8" />
+              <rect x="4" y="10.1" width="9.6" height="1.7" rx="0.85" />
+            </svg>
             {isTimeline ? "Dashboard" : "Línea de Tiempo"}
           </button>
           {!isTimeline && (

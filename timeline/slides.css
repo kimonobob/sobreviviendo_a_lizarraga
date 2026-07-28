@@ -43,7 +43,7 @@
 
   --sl-glass: color-mix(in srgb, var(--plane) var(--glass-tint), transparent);
   --sl-edge: color-mix(in srgb, var(--text-primary) 9%, transparent);
-  --ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
   --sl-dx: 26px;
 }
 
@@ -81,7 +81,18 @@
   transform: scale(1.06);
   pointer-events: none;
   filter: blur(var(--bg-blur));
-  animation: slKenBurns var(--bg-zoom) linear both;
+  animation: slKenBurns var(--bg-zoom) linear both,
+    slBgIn 900ms var(--ease) both;
+}
+
+/* fundido de la foto al cambiar de anio */
+@keyframes slBgIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--bg-opacity);
+  }
 }
 
 @keyframes slKenBurns {
@@ -90,6 +101,21 @@
   }
   to {
     transform: scale(1.16);
+  }
+}
+
+/* La foto saliente se apaga bajo la nueva: cruce real, sin corte. */
+.sl-bg-out {
+  z-index: 0;
+  animation: slBgOut 560ms var(--ease) both;
+}
+
+@keyframes slBgOut {
+  from {
+    opacity: var(--bg-opacity);
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -184,7 +210,7 @@
   color: var(--text-secondary);
   cursor: pointer;
   backdrop-filter: blur(20px) saturate(140%);
-  transition: color 200ms var(--ease), background-color 200ms var(--ease);
+  transition: color 300ms var(--ease), background-color 300ms var(--ease);
 }
 
 .sl-btn:hover {
@@ -192,14 +218,53 @@
   color: var(--text-primary);
 }
 
-/* ---------- Escenario ---------- */
-.sl-stage {
+/* ============================================================
+   Baraja: las dos láminas (la que sale y la que entra) se
+   superponen aquí durante el cruce.
+   ============================================================ */
+.sl-deck {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-height: 0;
   flex: 1 1 auto;
+}
+
+/* ---------- Escenario ---------- */
+.sl-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-height: 0;
   flex-direction: column;
   overflow-y: auto;
   padding: 8px clamp(20px, 5vw, 76px) 20px;
+}
+
+/* La lámina que se va: se desvanece hacia el lado contrario al avance.
+   Sus elementos se congelan en su estado final — si no, replicarían
+   toda la cascada de entrada mientras se van. */
+.sl-stage-out {
+  z-index: 0;
+  pointer-events: none;
+  animation: slStageOut 560ms var(--ease) both;
+}
+
+.sl-stage-out *,
+.sl-stage-out *::before,
+.sl-stage-out *::after {
+  animation: none !important;
+}
+
+@keyframes slStageOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--sl-dx) * -0.55));
+  }
 }
 
 /* el año gigante de marca de agua compite con la foto: fuera */
@@ -215,8 +280,8 @@
   flex: 1 1 auto;
   grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
   gap: clamp(18px, 3vw, 44px);
-  align-content: center;
-  align-items: center;
+  align-content: safe center;
+  align-items: safe center;
 }
 
 /* ============================================================
@@ -383,8 +448,13 @@
 .sl-side {
   position: relative;
   display: grid;
+  min-height: 0;
   gap: 20px;
-  align-content: center;
+  /* 'safe': si el contenido no cabe, se alinea al inicio en vez de
+     centrarse. Centrar algo más alto que su hueco lo desborda por
+     arriba y por abajo a la vez, y la parte de arriba se monta sobre
+     la barra sin posibilidad de alcanzarla con el scroll. */
+  align-content: safe center;
 }
 
 /* halo difuso del color de página: da contraste a los logos
@@ -404,28 +474,88 @@
   filter: blur(24px);
 }
 
+/* ---------- Marcas del año ----------
+   Una marca por fila. Repartirlas en columnas parecía aprovechar el
+   espacio, pero la mayoría de estos logotipos son apaisados —
+   "Grupo Romero" es 4:1— y al angostar la celda mandaba el ancho: el
+   logotipo encogía y desperdiciaba todo el alto disponible. Apilados,
+   cada uno dispone de la columna entera y el alto se reparte según
+   cuántas marcas haya ese año. */
+/* ── Estos son los valores por defecto ────────────────────────────
+   Cualquier año puede saltárselos desde timelineData.js sin tocar
+   este archivo. Ver la cabecera de EVENTS allí. */
 .sl-logos {
+  /* Alto del bloque de marcas, entero. Se acota el conjunto y no cada
+     marca: dando alto fijo a cada una, un año con cuatro sumaba más de
+     lo que cabía y el bloque se salía de la lámina por arriba. */
+  --sl-logos-h: min(44vh, 400px);
+  --sl-logos-cols: 1;
+
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px 16px;
+  height: var(--sl-logos-h);
+  grid-template-columns: repeat(var(--sl-logos-cols), minmax(0, 1fr));
+  /* las filas se reparten en partes iguales lo que quede tras los
+     huecos: una marca ocupa todo, cuatro se turnan un cuarto */
+  grid-auto-rows: minmax(0, 1fr);
+  gap: clamp(10px, 1.6vh, 20px) clamp(14px, 1.6vw, 24px);
   place-items: center;
+}
+
+/* Con una o dos marcas el techo baja: si no, una sola queda flotando
+   en medio de un vacío que no le corresponde. */
+.sl-logos[data-count="1"] {
+  --sl-logos-h: min(28vh, 250px);
+}
+.sl-logos[data-count="2"] {
+  --sl-logos-h: min(36vh, 330px);
+}
+
+/* De cinco en adelante (2020 trae cinco) ya no caben apiladas. Ahí sí
+   van en dos columnas: son marcas de logotipo cuadrado, que es el caso
+   donde angostar la celda no las encoge. */
+.sl-logos[data-count="5"],
+.sl-logos[data-count="6"] {
+  --sl-logos-cols: 2;
 }
 
 .sl-logo {
   display: grid;
-  min-height: 92px;
+  height: 100%;
   width: 100%;
+  min-height: 0;
   place-items: center;
 }
 
+/* El tamaño base: con solo max-* la imagen se queda en su tamaño
+   original — varios de estos archivos miden 300 px de ancho y se veían
+   diminutos. Ocupando la casilla, `contain` la agranda hasta el mayor
+   tamaño que quepa sin deformarla.
+
+   Encima de eso van los ajustes manuales de cada marca (scale / x / y),
+   que se escriben en timelineData.js. */
 .sl-logo img {
-  max-height: 108px;
-  max-width: 100%;
+  height: 100%;
+  width: 100%;
   object-fit: contain;
+  transform: translate(var(--img-x, 0px), var(--img-y, 0px))
+    scale(var(--img-scale, 1));
 }
 
-.sl-logos:has(.sl-logo:only-child) .sl-logo img {
-  max-height: 172px;
+/* Monograma de respaldo, por si un archivo deja de cargar: crece con la
+   casilla en vez de quedarse en el disco de 52 px del carril. */
+.sl-logo .tl-logo-fallback {
+  height: 74%;
+  width: auto;
+  aspect-ratio: 1;
+  font-size: clamp(16px, 3vh, 34px);
+}
+
+/* Varios logotipos son negros sobre fondo transparente: en tema oscuro
+   desaparecerían. Ahí —y solo ahí— necesitan una bandeja clara. */
+:root[data-theme="dark"] .sl-logos {
+  border-radius: 20px;
+  background: #f2f2ef;
+  padding: clamp(12px, 1.8vh, 20px) clamp(16px, 2vw, 26px);
 }
 
 .sl-fin {
@@ -627,7 +757,7 @@
   font-weight: 450;
   line-height: 1.35;
   color: var(--text-primary);
-  transition: color 160ms var(--ease);
+  transition: color 260ms var(--ease);
 }
 
 .sl-ov-legend {
@@ -670,8 +800,8 @@
   color: var(--text-secondary);
   cursor: pointer;
   backdrop-filter: blur(22px) saturate(150%);
-  transition: color 200ms var(--ease), background-color 200ms var(--ease),
-    transform 260ms var(--ease), opacity 200ms var(--ease);
+  transition: color 320ms var(--ease), background-color 320ms var(--ease),
+    transform 380ms var(--ease), opacity 320ms var(--ease);
 }
 
 .sl-arrow:hover:not(:disabled) {
@@ -714,7 +844,7 @@
   background: color-mix(in srgb, var(--text-primary) 14%, transparent);
   padding: 0;
   cursor: pointer;
-  transition: background-color 260ms var(--ease), flex-grow 320ms var(--ease);
+  transition: background-color 400ms var(--ease), flex-grow 480ms var(--ease);
 }
 
 .sl-seg[data-done="true"] {
@@ -824,30 +954,30 @@
   opacity: 0.07;
   pointer-events: none;
   filter: blur(60px);
-  animation: slAura 1000ms var(--ease) both;
+  animation: slAura 1200ms var(--ease) both;
 }
 
 .sl-main {
-  animation: slPanel 620ms var(--ease) both;
+  animation: slPanel 820ms var(--ease) both;
 }
 
 .sl-fx-slide {
-  animation: slSlide 460ms var(--ease) both;
+  animation: slSlide 640ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
 .sl-fx-rise {
-  animation: slRise 420ms var(--ease) both;
+  animation: slRise 580ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
 .sl-fx-pop {
-  animation: slPop 460ms var(--ease) both;
+  animation: slPop 620ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
 .sl-year {
-  animation: slFocus 620ms var(--ease) both;
+  animation: slFocus 860ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
@@ -855,7 +985,7 @@
 .sl-w {
   display: inline-block;
   padding-right: 0.24em;
-  animation: slRise 420ms var(--ease) both;
+  animation: slRise 580ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
@@ -867,7 +997,7 @@
   transform-origin: left center;
   border-radius: 999px;
   background: var(--sl-cat);
-  animation: slWipe 520ms var(--ease) both;
+  animation: slWipe 720ms var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
 
@@ -882,6 +1012,12 @@
   .sl-w,
   .sl-underline {
     animation: none;
+  }
+  /* sin cruce: la lámina saliente se retira de inmediato, si no
+     quedaría visible por debajo de la nueva */
+  .sl-stage-out,
+  .sl-bg-out {
+    display: none;
   }
 }
 
@@ -920,14 +1056,16 @@
   .sl-foot {
     padding: 8px 14px 12px;
   }
+  /* siguen apiladas: en vertical la columna es todo el ancho de la
+     lámina, que es justo lo que necesita un logotipo apaisado */
   .sl-logos {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    --sl-logos-h: min(34vh, 300px);
   }
-  .sl-logo {
-    min-height: 70px;
+  .sl-logos[data-count="1"] {
+    --sl-logos-h: min(22vh, 170px);
   }
-  .sl-logo img {
-    max-height: 76px;
+  .sl-logos[data-count="2"] {
+    --sl-logos-h: min(28vh, 235px);
   }
 }
 
