@@ -223,6 +223,19 @@ body {
     opacity 320ms ease;
 }
 
+/* Marca de agua del hito: el logo del año, grande y detrás del texto.
+   Va a color: es la marca de la empresa del año, y su color es parte de
+   la información. La opacidad se manda desde MARK_BG en timelineData.js.
+   En tema oscuro se invierte el canal de luminancia (y se rota el tono
+   para no alterar los colores): el rectángulo blanco de los PNG pasa a
+   negro y la marca sigue leyéndose sobre fondo oscuro. */
+.milestone-mark {
+  filter: none;
+}
+:root[data-theme="dark"] .milestone-mark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* Transición fade-in para cambio de vista / año */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }

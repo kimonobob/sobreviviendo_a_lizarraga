@@ -1,8 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { erVals, ratioItem, yearIndex } from "../lib/finance";
 import { soles, pct, veces } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import { ZoomModal } from "../components/ui/ZoomModal";
+import { YearPager } from "../components/ui/YearPager";
+import { ZoomInfo, hasZoomInfo } from "../components/ZoomInfo";
+import {
+  AnnualIncomeStatement,
+  KeyRatios,
+  AnnualEarningsComposition,
+  AnnualEquityStructure,
+} from "../components/annual/AnnualPanels";
 import { IncomeStatementLine } from "../components/charts/IncomeStatementLine";
 import { TreemapESF } from "../components/charts/TreemapESF";
 import { BalanceBarsAllYears } from "../components/charts/BalanceBarsAllYears";
@@ -12,6 +20,14 @@ import { RatioPanel } from "../components/charts/RatioPanel";
 import { IncomeWaterfall } from "../components/charts/IncomeWaterfall";
 import { CashCycleChart } from "../components/charts/CashCycleChart";
 import { EarningsCompositionBars } from "../components/charts/EarningsCompositionBars";
+import { MilestoneSlide } from "../components/MilestoneSlide";
+import { EVENTS as TIMELINE_EVENTS } from "../../timeline/timelineData";
+
+// La presentación arrastra sus propias láminas y estilos: solo se carga cuando
+// alguien la abre, no en el arranque del dashboard.
+const Presentation = lazy(() =>
+  import("../../timeline/Presentation").then((m) => ({ default: m.Presentation }))
+);
 
 
 function yoy(arr, i) {
@@ -121,10 +137,78 @@ function PrintReport({ data, year, ratios }) {
   );
 }
 
-export function Dashboard({ data, year, ratios }) {
+// Título y bajada de cada ventana ampliada. Se resuelven en cada render y no
+// al abrir el modal: dentro se cambia de año y de modo, y la cabecera tiene
+// que seguir al gráfico en vez de quedarse con el estado de entrada.
+// `anual` = el usuario eligió un año y la serie dio paso a ese ejercicio solo.
+const ZOOM_META = {
+  income: (y, anual) => [
+    "Estado de Resultados",
+    anual ? `Solo ${y} · cada línea contra ${y - 1}` : "Ventas · costos · gastos · utilidad neta · 2010–2025",
+  ],
+  ratios: (y, anual) => [
+    "Panel de Ratios",
+    anual ? `Ratios clave de ${y} · la tendencia va bajo cada cifra` : "Elige los ratios a comparar",
+  ],
+  waterfall: (y) => ["Cascada del Resultado", `Ingresos → utilidad neta · ${y}`],
+  earnings: (y, anual) => [
+    "Composición Utilidad Neta",
+    anual ? `De dónde sale la utilidad de ${y}` : "Operación vs. subsidiarias",
+  ],
+  equity: (y, anual) => [
+    "Estructura Patrimonial",
+    anual ? `Pasivo + patrimonio · ${y}` : "Pasivo + patrimonio · montos ↔ %",
+  ],
+  treemap: (y) => ["Estado de Situación Financiera", `Activo = Pasivo + Patrimonio · ${y}`],
+  ops: () => ["Operaciones por País", "Presencia de Alicorp · clic para detalles"],
+};
+
+// Ventanas cuyo gráfico es una serie 2010–2025 y tienen un equivalente de un
+// solo año. Las demás (cascada, balance, mapa) ya son de un año: elegir otro
+// simplemente las redibuja.
+const HAS_ANNUAL = new Set(["income", "ratios", "earnings", "equity"]);
+
+export function Dashboard({ data, year, ratios, onGoAnnual }) {
   const [zoomed, setZoomed] = useState(null);
-  const zoom = useCallback((id, title, subtitle) => setZoomed({ id, title, subtitle }), []);
-  const closeZoom = useCallback(() => setZoomed(null), []);
+
+  // El año de la ventana ampliada es suyo: mover la banda de años de abajo
+  // cambia lo que se proyecta y nada más. El dashboard de detrás se queda en
+  // el año que tenía — para llevárselo está el botón de vista anual.
+  const [zoomYear, setZoomYear] = useState(null);
+  const shownYear = zoomYear ?? year;
+
+  const zoom = useCallback(
+    (id) => {
+      setZoomYear(null); // cada ventana entra por el año del dashboard
+      setZoomed(id);
+    },
+    []
+  );
+  const closeZoom = useCallback(() => {
+    setZoomed(null);
+    setZoomYear(null);
+  }, []);
+  // Al abrir se ve la serie completa. En cuanto se elige un año, la ventana
+  // pasa a la fotografía de ese ejercicio.
+  const anual = zoomYear != null;
+  const [zoomTitle, zoomSubtitle] = zoomed ? ZOOM_META[zoomed](shownYear, anual) : [];
+  const zi = yearIndex(data, shownYear);
+
+  // La presentación se abre acotada al periodo del dashboard: la línea de
+  // tiempo arranca en 1956, pero aquí solo interesa el tramo con EEFF separados.
+  const [presenting, setPresenting] = useState(false);
+  const firstYear = data.meta.years[0];
+  const lastYear = data.meta.years[data.meta.years.length - 1];
+
+  // Si el año marcado no tuviera hito propio, se entra por el más cercano
+  // del tramo en vez de saltar al principio.
+  const startYear = useMemo(() => {
+    const inRange = TIMELINE_EVENTS.filter((e) => e.year >= firstYear && e.year <= lastYear);
+    if (inRange.length === 0) return year;
+    return inRange.reduce((best, e) =>
+      Math.abs(e.year - year) < Math.abs(best.year - year) ? e : best
+    ).year;
+  }, [year, firstYear, lastYear]);
 
   return (
     <>
@@ -136,15 +220,15 @@ export function Dashboard({ data, year, ratios }) {
           {/* ── Sección izquierda (40 %) ── */}
           <div className="dash-col flex min-h-0 flex-1 flex-col gap-2 lg:w-[40%] lg:max-w-[40%] lg:shrink-0">
             <Card compact className="min-h-[160px] flex-1"
-              onZoom={() => zoom("income", "Estado de Resultados", "Ventas · costos · gastos · utilidad neta · 2010–2025")}>
+              onZoom={() => zoom("income")}>
               <IncomeStatementLine data={data} markYear={year} title="Estado de Resultados" subtitle="Ventas · costos · gastos · utilidad neta · 2010–2025" />
             </Card>
             <Card compact className="min-h-[160px] flex-1"
-              onZoom={() => zoom("ratios", "Panel de Ratios", "Elige los ratios a comparar")}>
+              onZoom={() => zoom("ratios")}>
               <RatioPanel data={data} markYear={year} title="Panel de Ratios" subtitle="Elige los ratios a comparar" selected={ratios.selected} mode={ratios.mode} onSelected={ratios.setSelected} onMode={ratios.setMode} />
             </Card>
             <Card compact className="min-h-[160px] flex-1"
-              onZoom={() => zoom("waterfall", "Cascada del Resultado", `Ingresos → utilidad neta · ${year}`)}>
+              onZoom={() => zoom("waterfall")}>
               <IncomeWaterfall data={data} year={year} title="Cascada del Resultado" subtitle={`Ingresos → utilidad neta · ${year}`} />
             </Card>
           </div>
@@ -152,27 +236,32 @@ export function Dashboard({ data, year, ratios }) {
           {/* ── Sección central (30 %) ── */}
           <div className="dash-col flex min-h-0 flex-1 flex-col gap-2 lg:w-[30%] lg:max-w-[30%] lg:shrink-0">
             <Card compact className="min-h-[160px] flex-[2]"
-              onZoom={() => zoom("earnings", "Composición Utilidad Neta", "Operación vs. subsidiarias")}>
+              onZoom={() => zoom("earnings")}>
               <EarningsCompositionBars data={data} markYear={year} title="Composición Utilidad Neta" subtitle="Operación vs. subsidiarias" />
             </Card>
-            <Card compact className="min-h-[160px] flex-[2]"
-              onZoom={() => zoom("cycle", "Ciclo de Efectivo", "DIO/DSO/DPO + ciclo neto")}>
-              <CashCycleChart data={data} markYear={year} title="Ciclo de Efectivo" subtitle="DIO/DSO/DPO + ciclo neto" />
-            </Card>
             <Card compact className="min-h-[160px] flex-[1.5]"
-              onZoom={() => zoom("equity", "Estructura Patrimonial", "Pasivo + patrimonio · montos ↔ %")}>
+              onZoom={() => zoom("equity")}>
               <EquityStructureBars data={data} markYear={year} title="Estructura Patrimonial" subtitle="Pasivo + patrimonio · montos ↔ %" />
+            </Card>
+            {/* Aquí "ampliar" es abrir la presentación a pantalla completa. */}
+            <Card compact className="min-h-[160px] flex-[2]" onZoom={() => setPresenting(true)}>
+              <MilestoneSlide
+                year={year}
+                title="Hito del Año"
+                subtitle={`Línea de tiempo · ${year}`}
+                onPresent={() => setPresenting(true)}
+              />
             </Card>
           </div>
 
           {/* ── Sección derecha (30 %) ── */}
           <div className="dash-col flex min-h-0 flex-1 flex-col gap-2 lg:w-[30%] lg:max-w-[30%] lg:shrink-0">
             <Card title="Estado de Situación Financiera" subtitle={`Activo = Pasivo + Patrimonio · ${year}`} compact className="min-h-[200px] lg:flex-1"
-              onZoom={() => zoom("treemap", "Estado de Situación Financiera", `Activo = Pasivo + Patrimonio · ${year}`)}>
+              onZoom={() => zoom("treemap")}>
               <TreemapESF data={data} year={year} />
             </Card>
             <Card title="Operaciones por País" subtitle="Presencia de Alicorp · clic para detalles" compact className="min-h-[200px] lg:flex-1"
-              onZoom={() => zoom("ops", "Operaciones por País", "Presencia de Alicorp · clic para detalles")}>
+              onZoom={() => zoom("ops")}>
               <OperationsMap data={data} year={year} />
             </Card>
           </div>
@@ -180,18 +269,87 @@ export function Dashboard({ data, year, ratios }) {
       </div>
 
       {/* ---- Modal de zoom ---- */}
-      <ZoomModal open={!!zoomed} onClose={closeZoom} title={zoomed?.title} subtitle={zoomed?.subtitle}>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
-          {zoomed?.id === "income" && <IncomeStatementLine data={data} markYear={year} title="Estado de Resultados" subtitle="Ventas · costos · gastos · utilidad neta · 2010–2025" />}
-          {zoomed?.id === "ratios" && <RatioPanel data={data} markYear={year} title="Panel de Ratios" subtitle="Elige los ratios a comparar" selected={ratios.selected} mode={ratios.mode} onSelected={ratios.setSelected} onMode={ratios.setMode} />}
-          {zoomed?.id === "waterfall" && <IncomeWaterfall data={data} year={year} title="Cascada del Resultado" subtitle={`Ingresos → utilidad neta · ${year}`} />}
-          {zoomed?.id === "earnings" && <EarningsCompositionBars data={data} markYear={year} title="Composición Utilidad Neta" subtitle="Operación vs. subsidiarias" />}
-          {zoomed?.id === "cycle" && <CashCycleChart data={data} markYear={year} title="Ciclo de Efectivo" subtitle="DIO/DSO/DPO + ciclo neto" />}
-          {zoomed?.id === "equity" && <EquityStructureBars data={data} markYear={year} title="Estructura Patrimonial" subtitle="Pasivo + patrimonio · montos ↔ %" />}
-          {zoomed?.id === "treemap" && <TreemapESF data={data} year={year} />}
-          {zoomed?.id === "ops" && <OperationsMap data={data} year={year} />}
+      <ZoomModal
+        open={!!zoomed}
+        onClose={closeZoom}
+        title={zoomTitle}
+        subtitle={zoomSubtitle}
+        footer={
+          <YearPager
+            years={data.meta.years}
+            year={shownYear}
+            onYearChange={setZoomYear}
+            note={
+              HAS_ANNUAL.has(zoomed)
+                ? anual
+                  ? `Mostrando solo ${shownYear}. La serie completa sigue a un clic.`
+                  : "Serie 2010–2025 · elige un año para ver solo ese ejercicio"
+                : `Mostrando ${shownYear} · elige otro año para cambiar el ejercicio`
+            }
+            onReset={HAS_ANNUAL.has(zoomed) && anual ? () => setZoomYear(null) : undefined}
+            onGoAnnual={
+              onGoAnnual &&
+              ((y) => {
+                closeZoom();
+                onGoAnnual(y);
+              })
+            }
+          />
+        }
+      >
+        {/* El gráfico a la izquierda; a la derecha, las cifras del año que se
+            está proyectando. El mapa se queda con el ancho entero: ya trae su
+            propia lista de países al costado. */}
+        <div className="flex min-h-0 min-w-0 flex-1 gap-4 overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
+            {zoomed === "income" &&
+              (anual ? (
+                <AnnualIncomeStatement data={data} year={shownYear} i={zi} />
+              ) : (
+                <IncomeStatementLine data={data} markYear={shownYear} title="Estado de Resultados" subtitle="Ventas · costos · gastos · utilidad neta · 2010–2025" />
+              ))}
+            {zoomed === "ratios" &&
+              (anual ? (
+                <KeyRatios data={data} year={shownYear} i={zi} />
+              ) : (
+                <RatioPanel data={data} markYear={shownYear} title="Panel de Ratios" subtitle="Elige los ratios a comparar" selected={ratios.selected} mode={ratios.mode} onSelected={ratios.setSelected} onMode={ratios.setMode} />
+              ))}
+            {zoomed === "waterfall" && <IncomeWaterfall data={data} year={shownYear} title="Cascada del Resultado" subtitle={`Ingresos → utilidad neta · ${shownYear}`} />}
+            {zoomed === "earnings" &&
+              (anual ? (
+                <AnnualEarningsComposition data={data} i={zi} />
+              ) : (
+                <EarningsCompositionBars data={data} markYear={shownYear} title="Composición Utilidad Neta" subtitle="Operación vs. subsidiarias" />
+              ))}
+            {zoomed === "equity" &&
+              (anual ? (
+                <AnnualEquityStructure data={data} i={zi} />
+              ) : (
+                <EquityStructureBars data={data} markYear={shownYear} title="Estructura Patrimonial" subtitle="Pasivo + patrimonio · montos ↔ %" />
+              ))}
+            {zoomed === "treemap" && <TreemapESF data={data} year={shownYear} />}
+            {zoomed === "ops" && <OperationsMap data={data} year={shownYear} />}
+          </div>
+
+          {hasZoomInfo(zoomed) && (
+            <aside className="hidden w-[300px] shrink-0 flex-col border-l border-hair pl-4 lg:flex">
+              <ZoomInfo id={zoomed} data={data} year={shownYear} ratios={ratios} />
+            </aside>
+          )}
         </div>
       </ZoomModal>
+
+      {/* ---- Presentación a pantalla completa ---- */}
+      {presenting && (
+        <Suspense fallback={null}>
+          <Presentation
+            startYear={startYear}
+            fromYear={firstYear}
+            toYear={lastYear}
+            onClose={() => setPresenting(false)}
+          />
+        </Suspense>
+      )}
 
       {/* ---- Impresión (1 hoja) ---- */}
       <PrintReport data={data} year={year} ratios={ratios} />

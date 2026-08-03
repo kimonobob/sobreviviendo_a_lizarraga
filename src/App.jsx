@@ -167,7 +167,15 @@ export default function App() {
         ) : isAnual ? (
           <AnnualDashboard data={data} year={selYear} ratios={ratios} />
         ) : (
-          <Dashboard data={data} year={selYear} ratios={ratios} />
+          <Dashboard
+            data={data}
+            year={selYear}
+            ratios={ratios}
+            onGoAnnual={(y) => {
+              setYear(y);
+              setView("anual");
+            }}
+          />
         )}
       </main>
     </div>

@@ -14,10 +14,6 @@ import {
 } from "./timelineData";
 import "./slides.css";
 
-/** Total de láminas: un año por lámina + el plano general al final. */
-const TOTAL = EVENTS.length + 1;
-const OVERVIEW = EVENTS.length;
-
 /** Cuánto dura el cruce entre láminas. Debe coincidir con slStageOut/slBgOut
  *  en slides.css: si lo cambias aquí, cámbialo también allí. */
 const CROSSFADE_MS = 560;
@@ -181,30 +177,44 @@ function EventSlide({ ev }) {
 }
 
 /** Última lámina: toda la línea de tiempo de un vistazo. */
-function OverviewSlide({ onPick }) {
+function OverviewSlide({ slides, onPick }) {
   const counts = useMemo(() => {
     const m = {};
-    for (const e of EVENTS) m[e.category] = (m[e.category] ?? 0) + 1;
+    for (const e of slides) m[e.category] = (m[e.category] ?? 0) + 1;
     return m;
-  }, []);
+  }, [slides]);
+
+  // Cuando la presentación va acotada a un tramo, las etapas que quedan
+  // fuera no pintan una columna vacía: solo se listan las que tienen hitos.
+  const eras = useMemo(
+    () => ERAS.filter((era) => slides.some((e) => e.year >= era.from && e.year <= era.to)),
+    [slides]
+  );
+  const countries = useMemo(
+    () => [...new Set(slides.flatMap((e) => e.countries ?? []))],
+    [slides]
+  );
+
+  if (slides.length === 0) return null;
 
   return (
     <div className="sl-overview">
       <div className="sl-aura" aria-hidden />
       <div className="sl-ov-head">
         <h2 className="sl-ov-title sl-fx-rise" style={at(60)}>
-          Plano general — {EVENTS[0].year} a {EVENTS[EVENTS.length - 1].year}
+          Plano general — {slides[0].year} a {slides[slides.length - 1].year}
         </h2>
         <p className="sl-ov-sub sl-fx-rise" style={at(150)}>
-          {EVENTS.length} hitos · {ERAS.length} etapas · {ALL_COUNTRIES.length} países ·
-          de una planta de aceites y jabones en el Callao a un grupo multilatino de consumo masivo,
-          B2B y acuicultura.
+          {slides.length} hitos · {eras.length} etapas · {countries.length} países ·
+          {slides.length === EVENTS.length
+            ? " de una planta de aceites y jabones en el Callao a un grupo multilatino de consumo masivo, B2B y acuicultura."
+            : ` el tramo de la línea de tiempo que cubre el dashboard, sobre un recorrido total de ${ALL_COUNTRIES.length} países desde ${EVENTS[0].year}.`}
         </p>
       </div>
 
       <div className="sl-ov-eras">
-        {ERAS.map((era, col) => {
-          const items = EVENTS.filter((e) => e.year >= era.from && e.year <= era.to);
+        {eras.map((era, col) => {
+          const items = slides.filter((e) => e.year >= era.from && e.year <= era.to);
           const base = 220 + col * 85;
           return (
             <section key={era.id} className="sl-ov-era sl-fx-pop" style={at(base)}>
@@ -219,7 +229,7 @@ function OverviewSlide({ onPick }) {
                     <button
                       type="button"
                       className="sl-ov-item"
-                      onClick={() => onPick(EVENTS.indexOf(e))}
+                      onClick={() => onPick(slides.indexOf(e))}
                       title={`Ir a ${e.year}`}
                     >
                       <span
@@ -251,11 +261,36 @@ function OverviewSlide({ onPick }) {
 
 /**
  * Presentación a pantalla completa: una lámina por año y, al final,
- * el plano general de toda la línea de tiempo.
+ * el plano general de la línea de tiempo.
+ *
+ * `fromYear` / `toYear` acotan el recorrido a un tramo — el dashboard la abre
+ * solo sobre 2010–2025, que es el periodo con EEFF separados. `startYear`
+ * arranca en la lámina de ese año concreto (gana sobre `startIndex`).
  */
-export function Presentation({ startIndex = 0, onClose, onExitAt }) {
+export function Presentation({
+  startIndex = 0,
+  startYear = null,
+  fromYear = null,
+  toYear = null,
+  onClose,
+  onExitAt,
+}) {
   const rootRef = useRef(null);
-  const [i, setI] = useState(() => Math.min(Math.max(startIndex, 0), TOTAL - 1));
+
+  const slides = useMemo(
+    () =>
+      EVENTS.filter(
+        (e) => (fromYear == null || e.year >= fromYear) && (toYear == null || e.year <= toYear)
+      ),
+    [fromYear, toYear]
+  );
+  const OVERVIEW = slides.length;
+  const TOTAL = slides.length + 1;
+
+  const [i, setI] = useState(() => {
+    const byYear = startYear == null ? -1 : slides.findIndex((e) => e.year === startYear);
+    return Math.min(Math.max(byYear >= 0 ? byYear : startIndex, 0), TOTAL - 1);
+  });
   const [fs, setFs] = useState(false);
   // +1 avanzando, -1 retrocediendo: define hacia dónde entra el contenido.
   const [dir, setDir] = useState(1);
@@ -265,10 +300,10 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
   const [leaving, setLeaving] = useState(null);
   const shownRef = useRef(i);
 
-  const ev = i < OVERVIEW ? EVENTS[i] : null;
+  const ev = i < OVERVIEW ? slides[i] : null;
   const accent = ev ? categoryColor(ev.category) : "var(--brand)";
 
-  const leavingEv = leaving != null && leaving < OVERVIEW ? EVENTS[leaving] : null;
+  const leavingEv = leaving != null && leaving < OVERVIEW ? slides[leaving] : null;
 
   useEffect(() => {
     if (shownRef.current === i) return;
@@ -279,18 +314,21 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
   }, [i]);
 
   /** Salta a una lámina concreta, deduciendo la dirección de la animación. */
-  const goTo = useCallback((target) => {
-    setI((v) => {
-      const n = Math.min(TOTAL - 1, Math.max(0, target));
-      if (n !== v) setDir(n > v ? 1 : -1);
-      return n;
-    });
-  }, []);
+  const goTo = useCallback(
+    (target) => {
+      setI((v) => {
+        const n = Math.min(TOTAL - 1, Math.max(0, target));
+        if (n !== v) setDir(n > v ? 1 : -1);
+        return n;
+      });
+    },
+    [TOTAL]
+  );
 
   const next = useCallback(() => {
     setDir(1);
     setI((v) => Math.min(TOTAL - 1, v + 1));
-  }, []);
+  }, [TOTAL]);
 
   const prev = useCallback(() => {
     setDir(-1);
@@ -299,9 +337,9 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
 
   const close = useCallback(() => {
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-    onExitAt?.(i < OVERVIEW ? EVENTS[i].year : EVENTS[EVENTS.length - 1].year);
+    onExitAt?.(i < OVERVIEW ? slides[i].year : slides[slides.length - 1].year);
     onClose();
-  }, [i, onClose, onExitAt]);
+  }, [i, OVERVIEW, slides, onClose, onExitAt]);
 
   // El teclado maneja toda la navegación mientras la presentación está abierta.
   useEffect(() => {
@@ -325,7 +363,7 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, goTo, close]);
+  }, [next, prev, goTo, close, TOTAL]);
 
   useEffect(() => {
     rootRef.current?.focus();
@@ -387,6 +425,9 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
             alt=""
           />
           Alicorp S.A.A. · Línea de tiempo
+          {slides.length > 0 && slides.length < EVENTS.length && (
+            <> · {slides[0].year}–{slides[slides.length - 1].year}</>
+          )}
         </span>
         {era && (
           <span className="sl-era-pill">
@@ -417,11 +458,15 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
             }}
             aria-hidden
           >
-            {leavingEv ? <EventSlide ev={leavingEv} /> : <OverviewSlide onPick={() => {}} />}
+            {leavingEv ? (
+              <EventSlide ev={leavingEv} />
+            ) : (
+              <OverviewSlide slides={slides} onPick={() => {}} />
+            )}
           </div>
         )}
         <div className="sl-stage" data-overview={!ev} key={i}>
-          {ev ? <EventSlide ev={ev} /> : <OverviewSlide onPick={goTo} />}
+          {ev ? <EventSlide ev={ev} /> : <OverviewSlide slides={slides} onPick={goTo} />}
         </div>
       </div>
 
@@ -449,7 +494,7 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
       <div className="sl-foot">
         <div className="sl-progress">
           {Array.from({ length: TOTAL }, (_, k) => {
-            const e = k < OVERVIEW ? EVENTS[k] : null;
+            const e = k < OVERVIEW ? slides[k] : null;
             return (
               <button
                 key={k}
@@ -473,8 +518,8 @@ export function Presentation({ startIndex = 0, onClose, onExitAt }) {
           </span>
           <span>
             {i < OVERVIEW
-              ? `Hito ${i + 1} de ${EVENTS.length} · siguiente: ${
-                  i + 1 < OVERVIEW ? EVENTS[i + 1].year : "plano general"
+              ? `Hito ${i + 1} de ${slides.length} · siguiente: ${
+                  i + 1 < OVERVIEW ? slides[i + 1].year : "plano general"
                 }`
               : "Fin del recorrido — haz clic en cualquier hito para volver a él"}
           </span>

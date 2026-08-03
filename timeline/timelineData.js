@@ -117,6 +117,31 @@ export const FIN_BY_YEAR = {
    si dos se tocan, ese suele ser el motivo.
    ══════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════
+   MARCA DE AGUA DE LA TARJETA "HITO DEL AÑO"
+   ══════════════════════════════════════════════════════════════════
+   En el dashboard, el hito lleva de fondo UNA marca del año — la
+   primera de `images` — grande y ajustada a la tarjeta, por detrás del
+   texto. Los años sin imagen simplemente no llevan fondo.
+
+   El único mando es la opacidad. Es el equilibrio entre que se note la
+   marca y que el texto siga leyéndose:
+     0.05  apenas se intuye
+     0.09  el punto de partida
+     0.16  se ve claramente, y ya empieza a estorbar la lectura
+
+   Si un año concreto pide otra cosa —un logo muy oscuro que tapa, o
+   uno muy tenue que no se ve—, se pisa desde el propio hito:
+
+     { year: 2019, …, markOpacity: 0.06 }
+
+   Y si prefieres otra marca distinta a la primera de `images`:
+
+     { year: 2019, …, markSrc: "sapolio.png" }
+   ══════════════════════════════════════════════════════════════════ */
+
+export const MARK_BG = { opacity: 0.09 };
+
 /** Hitos en orden cronológico. */
 export const EVENTS = [
   {
@@ -271,6 +296,23 @@ export const EVENTS = [
     note: "Base separada 2010: la matriz opera como holding y mide sus inversiones por método de costo.",
   },
   {
+    year: 2011,
+    title: "Salida de los helados y primer año con NIIF plenas",
+    text: "Se venden los activos del negocio de helados, la Compañía adopta plenamente las NIIF y nace Alicorp Inversiones S.A.",
+    detail: [
+      "En setiembre de 2011 se venden los activos del negocio de helados, la categoría que había entrado con Lamborghini en 2004.",
+      "Primeros estados financieros separados con NIIF plenas: la fecha de transición es el 1 de enero de 2010 y ese año se reexpresa para comparar.",
+      "Se constituye Alicorp Inversiones S.A. (99.99%) con S/66,284 miles, un vehículo para agrupar las participaciones del grupo.",
+      "En setiembre se refinancia deuda con un préstamo de US$70,000 miles del Bank of America y Citibank, con vencimientos entre 2015 y 2018.",
+    ],
+    category: "desinversion",
+    flags: ["🇵🇪"],
+    countries: ["Perú"],
+    tags: ["Helados", "NIIF 1", "Alicorp Inversiones"],
+    images: [{ src: "lamborghini.png", label: "Helados Lamborghini", y: -120 }],
+    note: "Las inversiones en subsidiarias todavía se miden al costo — el cambio a método de participación recién llega en 2012, y es lo que rompe la comparabilidad del patrimonio. Las exportaciones fueron 14.1% de las ventas netas.",
+  },
+  {
     year: 2012,
     title: "Holdco España y Salmofood",
     text: "Creación de Alicorp Holdco España S.L. y adquisición de Salmofood (hoy Vitapro Chile) en nutrición animal. Se suma Okebón.",
@@ -326,6 +368,24 @@ export const EVENTS = [
     note: "Año de utilidad neta mínima del periodo por pérdidas en derivados de materias primas.",
   },
   {
+    year: 2015,
+    title: "Desapalancamiento y arranque de Masterbread",
+    text: "Año de saneamiento: se recorta deuda, se cierran las posiciones en derivados que hundieron 2014 y Masterbread empieza a operar.",
+    detail: [
+      "Masterbread S.A. (75%, constituida con un tercero en 2014) inicia operaciones comerciales el 28 de marzo de 2015.",
+      "La pérdida por derivados de materias primas cae de S/171,928 a S/8,631 miles y el fondo de garantía por derivados baja de S/220,655 a S/1,919 miles.",
+      "La deuda financiera se reduce de S/2,076,929 a S/1,615,146 miles entre corriente y no corriente.",
+      "Se aportan S/83,493 miles de capital a subsidiarias y se reciben S/83,364 miles en dividendos (Vitapro, Alicorp Ecuador y Alicorp Inversiones).",
+      "La planta de fideos Alianza, en la Av. Argentina, pasa a activos mantenidos para la venta.",
+    ],
+    category: "desinversion",
+    flags: ["🇵🇪"],
+    countries: ["Perú"],
+    tags: ["Masterbread", "Desapalancamiento", "Planta Alianza"],
+    images: [{ src: "masterbread.png", label: "Masterbread", y: -180, scale: 0.8 }],
+    note: "La utilidad neta se recupera a S/153,588 miles tras el mínimo de 2014, pero por control de derivados y gastos financieros, no por más ventas: los ingresos quedan planos frente al año anterior.",
+  },
+  {
     year: 2016,
     title: "Constitución de Vitapro Honduras",
     text: "Se constituye Vitapro Honduras S.A. de C.V. En el portafolio: Primor, Blanca Flor y Don Vittorio.",
@@ -344,6 +404,23 @@ export const EVENTS = [
       { src: "blanca-flor.png", label: "Blanca Flor",y: -220,scale:0.5,x:+150 },
       { src: "don-vittorio.png", label: "Don Vittorio",y: -210,scale:0.5,x:+150 },
     ],
+  },
+  {
+    year: 2017,
+    title: "Utilidad récord y simplificación societaria",
+    text: "La mejor utilidad neta separada hasta ese momento, con reordenamiento de subsidiarias y la evaluación de Bolivia ya en marcha.",
+    detail: [
+      "El 11 de setiembre de 2017 se aprueba la disolución y liquidación de Alicorp Guatemala S.A.",
+      "El 13 de octubre de 2017 Consorcio Distribuidor Iquitos S.A. se transfiere a Alicorp Inversiones S.A.; en diciembre se capitalizan S/21,310 miles de deuda.",
+      "El 17 de octubre de 2017 Cernical Group S.A. traslada su domicilio fiscal de Panamá al Perú.",
+      "Las subsidiarias aportan S/154,356 miles por método de participación y reparten S/96,060 miles en dividendos (Vitapro, S/61,359 miles).",
+    ],
+    category: "gobierno",
+    flags: ["🇵🇪", "🇬🇹", "🇵🇦"],
+    countries: ["Perú", "Guatemala", "Panamá"],
+    tags: ["Alicorp Guatemala", "Cernical Group", "Alicorp Inversiones"],
+    images: [{ src: "alicorp.png", label: "Alicorp S.A.A.", scale: 1.1, y: -60 }],
+    note: "De los S/453,095 miles de utilidad neta, S/154,356 miles vienen de las subsidiarias: un tercio del resultado no lo genera la operación propia. En enero de 2018 el Directorio aprueba evaluar la compra de Industrias del Aceite S.A. y ADM SAO S.A. — el paso previo a Bolivia.",
   },
   {
     year: 2018,

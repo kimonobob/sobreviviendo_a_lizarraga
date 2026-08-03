@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 
-export function ZoomModal({ open, onClose, title, subtitle, children }) {
+export function ZoomModal({ open, onClose, title, subtitle, footer, children }) {
   const esc = useCallback(
     (e) => {
       if (e.key === "Escape") onClose();
@@ -58,6 +58,9 @@ export function ZoomModal({ open, onClose, title, subtitle, children }) {
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
           {children}
         </div>
+        {footer && (
+          <footer className="shrink-0 border-t border-hair px-5 py-2.5">{footer}</footer>
+        )}
       </div>
     </div>,
     document.body

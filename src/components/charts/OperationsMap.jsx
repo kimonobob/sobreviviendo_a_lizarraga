@@ -136,6 +136,9 @@ export function OperationsMap({ data, year }) {
         </div>
 
         <div
+          // Los países se seleccionan con un clic: el mapa se queda ese clic
+          // para él en vez de dejar que la tarjeta lo tome para ampliar.
+          data-no-zoom
           className="relative min-h-[180px] flex-1 overflow-hidden rounded-lg border border-hair"
           style={{ background: "var(--map-water)" }}
         >
