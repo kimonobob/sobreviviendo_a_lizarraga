@@ -22,6 +22,17 @@ export function soles(milesValue, { millones = true, sign = false } = {}) {
   return `${s}S/ ${nf0.format(milesValue)}`;
 }
 
+/**
+ * Miles de soles tal cual, sin redondear ni convertir. Ej: 6370885 → "6,370,885".
+ * Es como vienen las cifras en el estado de resultados auditado, así que se usa
+ * donde el número tiene que poder cotejarse contra el EEFF línea por línea.
+ */
+export function solesMiles(milesValue, { sign = false } = {}) {
+  if (milesValue == null || Number.isNaN(milesValue)) return "—";
+  const s = sign && milesValue > 0 ? "+" : "";
+  return `${s}${nf0.format(milesValue)}`;
+}
+
 /** Monto corto para ejes: millones sin prefijo. Ej: 3221838 → "3,222" */
 export function axisMillones(milesValue) {
   if (milesValue == null) return "";

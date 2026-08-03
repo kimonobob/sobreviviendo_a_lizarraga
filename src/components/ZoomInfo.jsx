@@ -4,11 +4,11 @@ import {
   erLine,
   ratioItem,
   waterfall,
-  earningsComposition,
+  netIncomeBridge,
   financingStructure,
   balanceSegments,
 } from "../lib/finance";
-import { soles, pct, veces, dias, nf0 } from "../lib/format";
+import { soles, solesMiles, pct, veces, dias, nf0 } from "../lib/format";
 
 /**
  * Panel de cifras que acompaña al gráfico dentro de una ventana ampliada.
@@ -96,45 +96,32 @@ function waterfallRows(data, i) {
   const steps = waterfall(data, i);
   const prev = i > 0 ? Object.fromEntries(waterfall(data, i - 1).map((s) => [s.id, s.value])) : {};
   const ingresos = steps.find((s) => s.id === "ingresos")?.value || 1;
+  // Sin redondear: aquí es donde se cotejan los importes contra el EEFF.
   return steps.map((s) => ({
     key: s.id,
-    label: s.label,
-    value: soles(s.value, { sign: s.kind !== "anchor" }),
+    // El nombre del estado auditado: este panel existe para cotejar importes.
+    label: s.full ?? s.label,
+    value: solesMiles(s.value, { sign: s.kind !== "anchor" }),
     delta: delta(s.value, prev[s.id]),
     accent: s.kind === "anchor",
     sub: pct(s.value / ingresos),
   }));
 }
 
-const EC_PARTS = [
-  { id: "operativo", label: "Resultado operativo", color: "var(--series-3)" },
-  { id: "subsidiarias", label: "Part. en subsidiarias", color: "var(--series-6)" },
-  { id: "financiero", label: "Resultado financiero", color: "var(--series-2)" },
-  { id: "impuesto", label: "Impuesto", color: "var(--series-4)" },
-  { id: "discontinuadas", label: "Oper. discontinuadas", color: "var(--series-7)" },
-];
-
+// Los mismos tramos que dibuja el gráfico, con el nombre del estado auditado.
 function earningsRows(data, i) {
-  const ec = earningsComposition(data);
-  const row = ec[i];
-  const prev = i > 0 ? ec[i - 1] : null;
-  if (!row) return [];
-  return [
-    ...EC_PARTS.map((p) => ({
-      key: p.id,
-      label: p.label,
-      color: p.color,
-      value: soles(row[p.id], { sign: true }),
-      delta: delta(row[p.id], prev?.[p.id]),
-    })),
-    {
-      key: "neta",
-      label: "Utilidad neta",
-      value: soles(row.neta),
-      delta: delta(row.neta, prev?.neta),
-      accent: true,
-    },
-  ];
+  const steps = netIncomeBridge(data, i);
+  const prev =
+    i > 0 ? Object.fromEntries(netIncomeBridge(data, i - 1).map((s) => [s.id, s.value])) : {};
+  const ingresos = steps.find((s) => s.id === "ingresos")?.value || 1;
+  return steps.map((s) => ({
+    key: s.id,
+    label: s.full ?? s.label,
+    value: solesMiles(s.value, { sign: s.kind !== "anchor" }),
+    delta: delta(s.value, prev[s.id]),
+    accent: s.kind === "anchor",
+    sub: pct(s.value / ingresos),
+  }));
 }
 
 function equityRows(data, i) {
@@ -228,8 +215,16 @@ function ratioRows(data, i, selected) {
 
 const BUILDERS = {
   income: (data, i) => ({ caption: "Estado de resultados del año", rows: incomeRows(data, i) }),
-  waterfall: (data, i) => ({ caption: "Tramos de la cascada · % de ventas", rows: waterfallRows(data, i) }),
-  earnings: (data, i) => ({ caption: "De dónde sale la utilidad neta", rows: earningsRows(data, i) }),
+  waterfall: (data, i) => ({
+    caption: "Tramos de la cascada · % de ventas",
+    rows: waterfallRows(data, i),
+    unit: "S/ en miles, sin redondear",
+  }),
+  earnings: (data, i) => ({
+    caption: "De ventas netas a utilidad neta · % de ventas",
+    rows: earningsRows(data, i),
+    unit: "S/ en miles, sin redondear",
+  }),
   equity: (data, i) => ({ caption: "Cómo se financia el activo", rows: equityRows(data, i) }),
   treemap: (data, i) => ({ caption: "Bloques del balance", rows: treemapRows(data, i) }),
   ratios: (data, i, ratios) => ({
@@ -247,7 +242,7 @@ export function ZoomInfo({ id, data, year, ratios }) {
   if (!build) return null;
   const i = yearIndex(data, year);
   if (i < 0) return null;
-  const { caption, rows } = build(data, i, ratios);
+  const { caption, rows, unit = "S/ millones" } = build(data, i, ratios);
   const ing = erVals(data, "ingresos")[i];
 
   return (
@@ -272,7 +267,7 @@ export function ZoomInfo({ id, data, year, ratios }) {
       </div>
 
       <p className="shrink-0 border-t border-hair pt-2 text-[9px] leading-snug text-ink-muted">
-        S/ millones · EEFF separado · variación frente a {year - 1}
+        {unit} · EEFF separado · variación frente a {year - 1}
       </p>
     </div>
   );

@@ -98,8 +98,9 @@ export function AnnualIncomeStatement({ data, year, i }) {
 
 // ── RATIOS CLAVE — solo los más importantes, con sparkline interactivo ───────
 const KEY_RATIOS = [
-  { id: "roe", label: "ROE", higherBetter: true, color: "var(--brand)" },
-  { id: "roa", label: "ROA", higherBetter: true, color: "var(--series-6)" },
+  // Mismos colores que en el panel de ratios: rojo el ROA, azul el ROE.
+  { id: "roe", label: "ROE", higherBetter: true, color: "var(--series-2)" },
+  { id: "roa", label: "ROA", higherBetter: true, color: "var(--series-1)" },
   { id: "margen_neto", label: "Margen neto", higherBetter: true, color: "var(--series-3)" },
   { id: "margen_operativo", label: "Margen operativo", higherBetter: true, color: "var(--series-5)" },
   { id: "liquidez_corriente", label: "Liquidez corriente", higherBetter: true, color: "var(--series-2)" },

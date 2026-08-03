@@ -8,7 +8,6 @@ import { ZoomInfo, hasZoomInfo } from "../components/ZoomInfo";
 import {
   AnnualIncomeStatement,
   KeyRatios,
-  AnnualEarningsComposition,
   AnnualEquityStructure,
 } from "../components/annual/AnnualPanels";
 import { IncomeStatementLine } from "../components/charts/IncomeStatementLine";
@@ -20,6 +19,7 @@ import { RatioPanel } from "../components/charts/RatioPanel";
 import { IncomeWaterfall } from "../components/charts/IncomeWaterfall";
 import { CashCycleChart } from "../components/charts/CashCycleChart";
 import { EarningsCompositionBars } from "../components/charts/EarningsCompositionBars";
+import { NetIncomeBridge } from "../components/charts/NetIncomeBridge";
 import { MilestoneSlide } from "../components/MilestoneSlide";
 import { EVENTS as TIMELINE_EVENTS } from "../../timeline/timelineData";
 
@@ -151,10 +151,7 @@ const ZOOM_META = {
     anual ? `Ratios clave de ${y} · la tendencia va bajo cada cifra` : "Elige los ratios a comparar",
   ],
   waterfall: (y) => ["Cascada del Resultado", `Ingresos → utilidad neta · ${y}`],
-  earnings: (y, anual) => [
-    "Composición Utilidad Neta",
-    anual ? `De dónde sale la utilidad de ${y}` : "Operación vs. subsidiarias",
-  ],
+  earnings: (y) => ["Composición Utilidad Neta", `De ventas netas a utilidad neta · ${y}`],
   equity: (y, anual) => [
     "Estructura Patrimonial",
     anual ? `Pasivo + patrimonio · ${y}` : "Pasivo + patrimonio · montos ↔ %",
@@ -164,9 +161,10 @@ const ZOOM_META = {
 };
 
 // Ventanas cuyo gráfico es una serie 2010–2025 y tienen un equivalente de un
-// solo año. Las demás (cascada, balance, mapa) ya son de un año: elegir otro
-// simplemente las redibuja.
-const HAS_ANNUAL = new Set(["income", "ratios", "earnings", "equity"]);
+// solo año. Las demás ya son de un año: elegir otro simplemente las redibuja.
+// La composición de la utilidad neta queda fuera porque lleva su propio mando
+// anual/serie dentro del gráfico.
+const HAS_ANNUAL = new Set(["income", "ratios", "equity"]);
 
 export function Dashboard({ data, year, ratios, onGoAnnual }) {
   const [zoomed, setZoomed] = useState(null);
@@ -177,9 +175,13 @@ export function Dashboard({ data, year, ratios, onGoAnnual }) {
   const [zoomYear, setZoomYear] = useState(null);
   const shownYear = zoomYear ?? year;
 
+  // La composición de la utilidad neta lleva su propio modo dentro del zoom.
+  const [netMode, setNetMode] = useState("anual");
+
   const zoom = useCallback(
     (id) => {
       setZoomYear(null); // cada ventana entra por el año del dashboard
+      setNetMode("anual"); // y la composición, por su vista anual
       setZoomed(id);
     },
     []
@@ -237,7 +239,7 @@ export function Dashboard({ data, year, ratios, onGoAnnual }) {
           <div className="dash-col flex min-h-0 flex-1 flex-col gap-2 lg:w-[30%] lg:max-w-[30%] lg:shrink-0">
             <Card compact className="min-h-[160px] flex-[2]"
               onZoom={() => zoom("earnings")}>
-              <EarningsCompositionBars data={data} markYear={year} title="Composición Utilidad Neta" subtitle="Operación vs. subsidiarias" />
+              <NetIncomeBridge data={data} year={year} title="Composición Utilidad Neta" subtitle={`De ventas a utilidad neta · ${year}`} />
             </Card>
             <Card compact className="min-h-[160px] flex-[1.5]"
               onZoom={() => zoom("equity")}>
@@ -315,12 +317,17 @@ export function Dashboard({ data, year, ratios, onGoAnnual }) {
                 <RatioPanel data={data} markYear={shownYear} title="Panel de Ratios" subtitle="Elige los ratios a comparar" selected={ratios.selected} mode={ratios.mode} onSelected={ratios.setSelected} onMode={ratios.setMode} />
               ))}
             {zoomed === "waterfall" && <IncomeWaterfall data={data} year={shownYear} title="Cascada del Resultado" subtitle={`Ingresos → utilidad neta · ${shownYear}`} />}
-            {zoomed === "earnings" &&
-              (anual ? (
-                <AnnualEarningsComposition data={data} i={zi} />
-              ) : (
-                <EarningsCompositionBars data={data} markYear={shownYear} title="Composición Utilidad Neta" subtitle="Operación vs. subsidiarias" />
-              ))}
+            {/* Este cuadro trae su propio mando anual/serie: entra en anual,
+                que es como se lee un puente, y la serie queda a un clic. */}
+            {zoomed === "earnings" && (
+              <NetIncomeBridge
+                data={data}
+                year={shownYear}
+                mode={netMode}
+                onMode={setNetMode}
+                subtitle={netMode === "serie" ? "Operativa → neta, año a año" : "De ventas a utilidad neta"}
+              />
+            )}
             {zoomed === "equity" &&
               (anual ? (
                 <AnnualEquityStructure data={data} i={zi} />

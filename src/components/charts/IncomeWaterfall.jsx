@@ -1,15 +1,6 @@
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  LabelList,
-} from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, LabelList } from "recharts";
 import { waterfall, yearIndex } from "../../lib/finance";
-import { soles, axisMillones } from "../../lib/format";
+import { solesMiles } from "../../lib/format";
 import { ink, flow } from "../../lib/palette";
 import { ResponsiveLegend } from "../ui/Legend";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
@@ -29,14 +20,14 @@ export function IncomeWaterfall({ data, year, title, subtitle, chart }) {
     if (!active || !payload?.length) return null;
     const s = payload[0].payload;
     return (
-      <TooltipBox title={s.label}>
+      <TooltipBox title={s.full ?? s.label}>
         <TooltipRow
           color={kindColor(s.kind)}
           label={s.kind === "anchor" ? "Monto" : s.value >= 0 ? "Suma" : "Resta"}
-          value={soles(s.value, { sign: s.kind !== "anchor" })}
+          value={solesMiles(s.value, { sign: s.kind !== "anchor" })}
           strong
         />
-        {s.kind !== "anchor" && <TooltipRow label="Acumulado" value={soles(s.cumul)} />}
+        {s.kind !== "anchor" && <TooltipRow label="Acumulado" value={solesMiles(s.cumul)} />}
       </TooltipBox>
     );
   };
@@ -55,7 +46,7 @@ export function IncomeWaterfall({ data, year, title, subtitle, chart }) {
         className="tnum"
         style={{ fontSize: 11, fill: ink.secondary }}
       >
-        {soles(s.value, { sign: s.kind !== "anchor" })}
+        {solesMiles(s.value, { sign: s.kind !== "anchor" })}
       </text>
     );
   };
@@ -77,6 +68,9 @@ export function IncomeWaterfall({ data, year, title, subtitle, chart }) {
             <p className="truncate text-[9px] leading-snug text-ink-secondary">{subtitle}</p>
           )}
         </div>
+        {/* Las cifras van sin redondear, en miles, como en el EEFF auditado:
+            la unidad tiene que estar a la vista o el importe no se puede cotejar. */}
+        <span className="shrink-0 text-[9px] tracking-wide text-ink-muted">S/ en miles</span>
       </div>
       <div className="flex min-h-0 flex-1 gap-2">
         <div className="min-h-0 flex-1">
@@ -84,21 +78,17 @@ export function IncomeWaterfall({ data, year, title, subtitle, chart }) {
           <BarChart
             layout="vertical"
             data={steps}
-            margin={{ top: 2, right: 58, bottom: 2, left: 2 }}
-            barCategoryGap="18%"
+            margin={{ top: 2, right: 74, bottom: 2, left: 2 }}
+            barCategoryGap="16%"
           >
-            <CartesianGrid stroke={ink.grid} horizontal={false} />
-            <XAxis
-              type="number"
-              tickFormatter={axisMillones}
-              tick={{ fill: ink.muted, fontSize: 10 }}
-              tickLine={false}
-              axisLine={{ stroke: ink.baseline }}
-            />
+            {/* Sin eje numérico ni rejilla: cada tramo ya lleva su cifra exacta
+                al lado, y una regla en millones junto a importes en miles solo
+                sembraba dudas sobre la unidad. */}
+            <XAxis type="number" hide />
             <YAxis
               type="category"
               dataKey="label"
-              width={102}
+              width={126}
               tick={{ fill: ink.secondary, fontSize: 10 }}
               tickLine={false}
               axisLine={false}

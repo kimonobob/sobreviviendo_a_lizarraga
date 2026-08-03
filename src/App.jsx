@@ -96,7 +96,7 @@ export default function App() {
               Alicorp S.A.A.
             </h1>
             <p className="text-[11px] leading-tight text-ink-secondary">
-              EEFF separados · {years[0]}–{years[years.length - 1]}
+              Análisis Financiero {years[0]}–{years[years.length - 1]}
             </p>
           </div>
         </div>

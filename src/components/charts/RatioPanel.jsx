@@ -14,6 +14,15 @@ import { SegToggle } from "../ui/Toggle";
 import { TooltipBox, TooltipRow } from "../ui/ChartTooltip";
 import { ChartBox } from "../ui/ChartBox";
 
+// Ratios con color fijado a mano, por encima del reparto por posición. ROA y
+// ROE son la pareja que más se mira junta —son la comparación de rentabilidad
+// del análisis— y merecen un color propio que no dependa de dónde caigan en la
+// lista: rojo el ROA, azul el ROE.
+const FIXED_COLORS = {
+  roa: "--series-1",
+  roe: "--series-2",
+};
+
 // Aplana todos los ratios y asigna un color ESTABLE por id (identidad, no rango).
 function useFlatRatios(data) {
   return useMemo(() => {
@@ -26,7 +35,7 @@ function useFlatRatios(data) {
     });
     const color = {};
     flat.forEach((r, i) => {
-      color[r.id] = `var(${SERIES_VARS[i % SERIES_VARS.length]})`;
+      color[r.id] = `var(${FIXED_COLORS[r.id] ?? SERIES_VARS[i % SERIES_VARS.length]})`;
     });
     return { flat, color };
   }, [data]);
